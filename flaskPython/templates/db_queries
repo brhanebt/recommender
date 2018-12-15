@@ -1,0 +1,104 @@
+\l
+\c ckan_metadata
+
+id                | text     |           |          |
+ title             | text     |           |          |
+ description       | text     |           |          |
+ metadata_created  | date     |           |          |
+ id_increment      | integer  |           | not null | nextval('postgresql_id_increment_seq'::regclass)
+ extent            | text     |           |          |
+ geojson_url       | text     |           |          |
+ local_geojson_url | text     |           |          |
+ csvurl            | text     |           |          |
+ local_csv_url     | text     |           |          |
+ tags              | text     |           |          |
+ tokens
+
+
+ALTER TABLE metadata_table ADD COLUMN tokens TSVECTOR;
+
+UPDATE metadata_table d1  
+SET tokens = to_tsvector(d1.document_text)  
+FROM metadata_table d2;
+
+ title             | text     |           |          |
+ description       | text     |           |          |
+ tags
+
+UPDATE metadata_table d1 SET tokens = setweight(to_tsvector('pg_catalog.english', coalesce(d1.title,'')), 'A')    ||    setweight('pg_catalog.english',to_tsvector(coalesce(d1.description,'')), 'B')  ||    setweight(to_tsvector('pg_catalog.english',coalesce(d1.tags,'')), 'A') From metadata_table d2;
+
+CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE ON metadata_table FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(tokens, 'pg_catalog.english', title, body);
+CREATE FUNCTION tsvector_trigger_t() RETURNS trigger AS $$
+begin
+  new.tokens :=
+setweight(to_tsvector('pg_catalog.english',coalesce(new.title,'')), 'A')||    
+setweight(to_tsvector('pg_catalog.english',coalesce(new.description,'')), 'B')||   setweight(to_tsvector('pg_catalog.english',coalesce(new.tags,'')), 'A');
+  return new;
+end
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tsvectorupdate_t BEFORE INSERT OR UPDATE
+    ON metadata_t_json FOR EACH ROW EXECUTE PROCEDURE tsvector_trigger_t();
+
+create table new_table as SELECT id,title,tokens FROM metadata_table  LIMIT 10;
+
+
+SELECT * FROM documents WHERE tokens @@ to_tsquery(form_data[0]);
+
+
+drop table geom_table;
+CREATE TABLE geom_table AS 
+  SELECT geom AS the_geom 
+  FROM metadata_table;
+
+  update metadata_table set the_geom = st_transform(geom, 4326);
+
+update geom_table set geom = st_transform(the_geom, 4326);
+alter table geom_table add column the_geom geometry;
+  UPDATE geom_table SET geom_table  = ST_SetSRID(the_geom, 4326) where ST_SRID(the_geom) = 84;
+
+    UPDATE metadata_table SET geom  = ST_SetSRID(geom, 4326) where ST_SRID(geom) = 84;
+
+    update geom_table set geom = st_transform(the_geom, 4326);
+
+
+
+    CREATE TABLE metadata_table_copy AS 
+SELECT
+*
+FROM
+    metadata_table;
+
+
+    SELECT mt.id,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('transport') as tsq where ST_Intersects(st_geomfromgeojson('{"type": "Polygon", "coordinates": [[[-125.0, 7.96], [-125.0, 49.5], [-30.0, 49.5], [-30.0, 7.96], [-125.0, 7.96]]]}'), the_geom) order by rank desc;
+
+
+
+    geocoding_result = requests.get('http://api.geonames.org/searchJSON?q='+location[0]+'&maxRows=10&username=brhanebt01');
+	cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects('POINT("+geocoding_result.json()['geonames'][0]['lng']+" "+geocoding_result.json()['geonames'][0]['lat']+")'::geography::geometry, the_geom) order by rank desc limit 50;");
+
+	select ST_DWithin (ST_GeomFromText('POINT(7.6 51.9)',4326),ST_GeomFromText('POINT(10.5 51.5)',4326), 1000)
+
+
+
+
+	select id,id_increment,ts_headline(title + " " + description, tsq) SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects('POINT("+geocoding_result.json()['geonames'][0]['lng']+" "+geocoding_result.json()['geonames'][0]['lat']+")'::geography::geometry, the_geom) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+
+	select id,ts_headline(title + " " + description, tsq), ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects('POINT("+geocoding_result.json()['geonames'][0]['lng']+" "+geocoding_result.json()['geonames'][0]['lat']+")'::geography::geometry, the_geom) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+
+
+
+  "SELECT ts_rank(i.tokens, replace(strip(original.tokens)::text, ' ', '|')::tsquery) as similarity, i.id, i.id_increment, i.title, i.description, i.geom,i.the_geom FROM metadata_table i, (SELECT tokens, id_increment FROM metadata_table WHERE id_increment="+ +" limit 1) AS original WHERE i.id_increment != original.id_increment ORDER BY similarity limit 5";
+
+
+
+  SELECT field1, field2,
+  CASE
+    WHEN field1>0 THEN field2/field1
+    ELSE 0
+  END 
+  AS field3
+FROM test
+
+
+select * from(select id, id_increment, title, st_area(st_intersection(st_geomfromgeojson('{"type": "Polygon", "coordinates": [[[-125.0, 7.96], [-125.0, 49.5], [-30.0, 49.5], [-30.0, 7.96], [-125.0, 7.96]]]}')::geometry, poly_geometry))/st_area(poly_geometry)) as proportion limit 20) where order by proportion asc;

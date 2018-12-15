@@ -1,0 +1,57 @@
+
+A critical aspect of query expansion based on external resources
+is the coverage of the latter. An external resource should cover as
+much as possible all the aspects and meanings of the query terms.
+In this study, we choose to use ConceptNet [22], which is one of
+the largest common-sense knowledge base that covers semantic
+relationships between real-world concepts. It has been proven to
+be an effective resource that could help improve retrieval
+performance, especially for difficult queries [13][14][15][16].
+
+
+
+The Maximal Marginal Relevance (MMR) [4] method is a representative implicit SRD method. It attempts to select documents by maximizing relevance and
+reducing redundancy to higher ranked documents. Several studies
+extended MMR [20][1] and applied it in different domains
+[5]0[11]. In contrast, an explicit SRD approach attempts to cover
+as much as possible the different subtopics of the query. A
+representative method is xQuAD (explicit Query Aspect
+Diversification framework) 0[21]. Recently, Vargas et al. [23]
+observed that the retrieval results from which documents are
+selected could be improved through query expansion. They
+adopted xQuAD to select diverse expansion terms extracted from
+documents related to different query aspects.
+
+
+
+retrieval perform- ance are used to compare the differences between the two resources. With the pre- liminary analysis and the verification of manual expansion, we have shown that
+ance are used to compare the differences between the two resources. With the pre- liminary analysis and the verification of manual expansion, we have shown that WordNet is good at proposing kernel words and ConceptNet is useful to find coopera-liminary analysis and the verification of manual expansion, we have shown that WordNet is good at proposing kernel words and ConceptNet is useful to find coopera- tive concepts. With an appropriate weighting scheme, the two resources can comple-WordNet is good at proposing kernel words and ConceptNet is useful to find coopera- tive concepts. With an appropriate weighting scheme, the two resources can comple- ment each other to improve IR performance.
+tive concepts. With an appropriate weighting scheme, the two resources can comple- ment each other to improve IR performance. In future work, we will investigate an automatic
+ment each other to improve IR performance. In future work, we will investigate an automatic query expansion method to com-
+bine the advantages of the two resources. Commonsense knowledge in ConceptNet is
+In future work, we will investigate an automatic query expansion method to com-
+bine the advantages of the two resources. Commonsense knowledge in ConceptNet is deeply context-sensitive so that it needs enough context information for automatic
+bine the advantages of the two resources. Commonsense knowledge in ConceptNet is deeply context-sensitive so that it needs enough context information for automatic query expansion. Using existing methods such as pseudo relevance feedback or re-deeply context-sensitive so that it needs enough context information for automatic query expansion. Using existing methods such as pseudo relevance feedback or re- sources such as WordNet to increase the context information can be explored. We
+query expansion. Using existing methods such as pseudo relevance feedback or re- sources such as WordNet to increase the context information can be explored. We also intend to investigate whether complex techniques of word sense disambiguation
+sources such as WordNet to increase the context information can be explored. We also intend to investigate whether complex techniques of word sense disambiguation (WSD) in WordNet are necessary for IR, under the existence of ConceptNet.
+also intend to investigate whether complex techniques of word sense disambiguation (WSD) in WordNet are necessary for IR, under the existence of ConceptNet.
+
+As commonsense knowledge is deeply
+context-sensitive, the suitability of ConceptNet for QE is still uncertain. Note that
+ConceptNet bears word sense ambiguities without differentiation
+
+
+
+
+
+
+Hausdorff distance is the «  maximum distance of a set to the nearest point in the other set »
+
+
+without 183
+wordnet 209
+Register of Protected Areas - Salmonid Water Regs Table
+NUTS2 - Ungeneralised
+WFD Overall River Water Risk Score (2008)
+NUTS2 - Generalised
+conceptnet 716

@@ -1,0 +1,30 @@
+{% extends 'index-base.html' %}
+
+{% block body %}
+<div class="container">
+   <h3 align="center">Application Keywords</h3>
+   <br />
+   <h4 align="center">Enter Keywords</h4>
+   <h5 align="center">E.g: Population</h5>
+   <h5 align="center"><pre>Or: London</pre></h5>
+   <br />
+   <form method="post" action="http://localhost:5000/result" id="insert_form">
+    <div class="table-repsonsive">
+     <span id="error"></span>
+     <table class="table table-bordered" id="keyword_table">
+      <tr>
+       <th>Enter Keyword</th>
+       <th>Keyword Type</th>
+       <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon glyphicon-plus"></span></button></th>
+      </tr>
+     </table>
+     <div align="center">
+      <input type="submit" name="submit" style="width:100px" class="btn btn-info" value="Search" />
+     </div>
+    </div>
+   </form>
+  </div>
+        </form>
+      </div>
+
+{% endblock %}

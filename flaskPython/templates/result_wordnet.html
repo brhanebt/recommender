@@ -1,0 +1,27 @@
+ {% extends 'index-base.html' %} 
+ {% block body %}
+<div class="container">
+  <h3 align="center">Application Keywords</h3>
+  <h4 align="center">Enter Keywords</h4>
+  <form method="post" action="/result_wordnet" id="insert_form">
+    <div class="table-repsonsive">
+      <span id="error"></span>
+      <table class="table table-bordered" id="keyword_table">
+        <tr>
+          <th>Enter Keyword</th>
+          <th>Keyword Type</th>
+          <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon glyphicon-plus"></span></button></th>
+      </table>
+      </div>
+      <div align="center">
+        <input type="submit" name="submit" class="btn btn-info" value="submit" onclick="showDiv();" />
+      </div>
+      </form>
+        
+      <div class="container">
+        <div class="row">
+        </div>
+        </div>
+</div>
+
+{% endblock %}

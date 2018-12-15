@@ -1,0 +1,46 @@
+{% extends 'index-base.html' %}
+
+{% block body %}
+	<div class="container">
+   <h3 align="center">Application Keywords</h3>
+   <br />
+   <h4 align="center">Enter Keywords</h4>
+   <h5 align="center">E.g: Population</h5>
+   <h5 align="center"><pre>Or: London</pre></h5>
+   <br />
+   <form method="post" id="insert_form">
+    <div class="table-repsonsive">
+     <span id="error"></span>
+     <table class="table table-bordered" id="keyword_table">
+      <tr>
+       <th>Enter Keyword</th>
+       <th>Keyword Type</th>
+       <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon- glyphicon-plus"></span></button></th>
+      </tr>
+     </table>
+     <div align="center">
+      <input type="submit" name="submit" class="btn btn-info" value="Insert" />
+     </div>
+    </div>
+   </form>
+  </div>
+        </form>
+      </div>
+
+      
+      <div class="container">
+      	<div class="row">
+
+      		<!-- Example row of columns -->
+        {% for metadata in mymetadata %}
+          <div class="col-md-4">
+            <h4>{{metadata.title}}</h4>
+            <p class = "description-paragraph">{{metadata.description}}</p>
+            <p><a class="btn btn-secondary" href="http://localhost:5000/details" role="button">View details &raquo;</a></p>
+    <input id="input-1" name="input-1" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" value="2">
+          </div>
+          {% endfor %}
+        </div>
+        </div>
+
+{% endblock %}

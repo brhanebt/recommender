@@ -1,0 +1,111 @@
+{% extends 'index-base.html' %}
+
+{% block body %}
+        <div class="container">
+          <h3 align="center">Application Keywords</h3>
+  <h4 align="center">Enter Keywords</h4>
+  <h5 align="center">E.g: {{Population}} Or: {{london}}</h5>
+  <span id="wkt" style="visibility: hidden;" data-title="{{selected_metadata[0][2]}}"></span>
+  <form method="post" action="/result_base" id="insert_form">
+    <div class="table-repsonsive">
+      <span id="error"></span>
+      <table class="table table-bordered" id="keyword_table">
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <button type="button" name="add" class="btn btn-success btn-sm add">
+            <span class="glyphicon glyphicon-plus"></span>
+          </button>
+          </td>
+        </tr>
+      </table>
+      </div>
+      <div align="center">
+        <input type="submit" name="submit" class="btn btn-info" value="submit" />
+      </div>
+      </form>
+        <div class="container" >
+        <div class="row" id = "data-wkt" data-wkt="{{selected_metadata[0][4]}}">
+          <!-- {{selected_metadata}} -->
+          <div style="width:100%; margin:0 auto;" id="mapContainer">
+            <h4>{{selected_metadata[0][2]}}</h4>
+            <p >{{selected_metadata[0][3]}}</p>
+            <!-- <p >{{selected_metadata[0][2]}}</p> -->
+            <div id="map" style="height: 150px;"></div>
+          </div>
+        </div>
+        </div>
+        <div class="container">
+        <div class="row">
+        {% for metadata in selected_similar %}
+          <div class="col-md-4" style="padding: 0;">
+            <h4 align="center">{{metadata.title}}</h4>
+            <p class = "description-paragraph" style="margin: auto">{{metadata.description}}</p>
+          <p><a class="btn btn-secondary" href="/details/{{metadata.id_increment}}" role="button">View details &raquo;</a></p>
+            <span class="rating">
+    <input type="radio" class="rating-input"
+           id="rating-input-1-5" name="rating-input-1">
+    <label for="rating-input-1-5" class="rating-star"></label>
+    <input type="radio" class="rating-input"
+           id="rating-input-1-4" name="rating-input-1">
+    <label for="rating-input-1-4" class="rating-star"></label>
+    <input type="radio" class="rating-input"
+           id="rating-input-1-3" name="rating-input-1">
+    <label for="rating-input-1-3" class="rating-star"></label>
+    <input type="radio" class="rating-input"
+           id="rating-input-1-2" name="rating-input-1">
+    <label for="rating-input-1-2" class="rating-star"></label>
+    <input type="radio" class="rating-input"
+           id="rating-input-1-1" name="rating-input-1">
+    <label for="rating-input-1-1" class="rating-star"></label>
+</span>
+  
+          </div>
+          {% endfor %}
+        </div>
+        </div>
+      </div>
+
+<script type="text/javascript">
+
+  function add_map(wkt) {
+    var map;
+    if(!map){
+      map = L.map('map');
+}
+    // console.log(wkt);
+    wkt=JSON.parse(wkt);
+    // console.log(wkt);
+    var geojsonFeature = {
+    "type": "Feature",
+    "geometry": {
+        "type":wkt["type"],
+        "coordinates":wkt["coordinates"]
+
+    }
+};
+
+  var myStyle = {
+    "color": "#ff7800",
+    "weight": 5,
+    "opacity": 0.65
+};
+    L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+  }).addTo(map);
+ var myLayer = new L.geoJSON(geojsonFeature,
+  {style:myStyle}).addTo(map);
+ if(geojsonFeature.geometry.type == 'Polygon'){
+  var centroid = myLayer.getBounds().getCenter();
+map.setView([centroid.lat,centroid.lng], 4);
+ map.fitBounds(myLayer.getBounds());
+ }
+ else{
+map.setView([geojsonFeature.geometry.coordinates[1],geojsonFeature.geometry.coordinates[0]], 10);
+L.marker([geojsonFeature.geometry.coordinates[1],geojsonFeature.geometry.coordinates[0]]).addTo(map).bindPopup("<strong>"+document.getElementById('wkt').dataset.title+"</strong>").openPopup();
+  }
+ }
+  add_map(document.getElementById('data-wkt').dataset.wkt);
+</script>
+{% endblock %}
