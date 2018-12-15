@@ -1,0 +1,22 @@
+{
+  "name": "recommender-app-flask-python",
+  "version": "1.0.0",
+  "description": "recommender app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brhanebt/recommender.git"
+  },
+  "author": "BrhaneB",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brhanebt/recommender/issues"
+  },
+  "homepage": "https://github.com/brhanebt/recommender#readme",
+  "keywords": [
+    "flask"
+  ]
+}
