@@ -109,7 +109,7 @@ input.remove
 .rating:not(:checked) > label:hover,
 .rating:not(:checked) > label:hover ~ label {
     color: gold;
-    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
+    /*text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);*/
 }
 
 .rating > input:checked + label:hover,
@@ -118,7 +118,7 @@ input.remove
 .rating > input:checked ~ label:hover ~ label,
 .rating > label:hover ~ input:checked ~ label {
     color: #ea0;
-    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
+    /*text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);*/
 }
 
 .rating > label:active {
@@ -175,8 +175,6 @@ $(document).ready(function(){
    }
    count = count + 1;
   });
-  
-  
   $('.keyword_type').each(function(){
    var count = 1;
    if($(this).val() == '')
@@ -197,6 +195,7 @@ $(document).ready(function(){
     {
       var y = document.getElementsByClassName('container');
       var y = y[y.length-1].getElementsByClassName('row');
+      y[0].innerHTML = '';
       // y[0].append(data);
       if(data){
         data.forEach(function(d) {
@@ -223,6 +222,7 @@ $(document).ready(function(){
            divElem.append(p_detailsElem);
            spanElem = document.createElement('span');
            spanElem.className = 'rating';
+           spanElem.setAttribute('id','rating-span-'+d[1]);
            for (index=5;index>=1;index--){
               inputElem = document.createElement('input');
               inputElem.setAttribute('type','radio');
@@ -232,9 +232,14 @@ $(document).ready(function(){
               labelElem = document.createElement('label');
               labelElem.setAttribute('name','rating-input-1');
               labelElem.setAttribute('class','rating-star');
+              labelElem.setAttribute('id','rating-input-'+index+'-'+d[1]);
+              labelElem.addEventListener("mouseenter", changeRatingStars);
+              labelElem.addEventListener("mouseleave", resetRatingStars);
+              labelElem.addEventListener("click", setRating);
               spanElem.append(inputElem);
               spanElem.append(labelElem);
            }
+           // spanElem.addEventListener("click", changeRatingStars);
            divElem.append(spanElem);
            y[0].appendChild(divElem);
       })
@@ -254,6 +259,105 @@ $(document).ready(function(){
  });
  
 });
+// star_elements = $('.rating-star');
+// star_elements.mouseenter(changeRatingStars);
+// star_elements.mouseleave(resetRatingStars);
+var mX = 0;
+var prevTarget_id="";
+var prev_span_id=0;
+var prev_star_id=0;
+function changeRatingStars(e)
+{
+  if(!prevTarget_id){
+    var all_p = prevTarget_id.split('-');
+    prev_star_id = parseInt(all_p[2]);
+    prev_span_id = parseInt(all_p[3]);
+  }
+  var all_c = e.target.id.split('-');
+  curr_star_id = parseInt(all_c[2]);
+  curr_span_id = parseInt(all_c[3]);
+  prevTarget_id = e.target.id;
+  // console.log(prev_star_id,'-',prev_span_id,'-', curr_star_id,'-',curr_span_id);
+  if(prev_star_id==curr_span_id && prev_star_id<=curr_star_id){
+    var element;
+    for(i=1;i<=curr_star_id;i++){
+      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
+      element.style.color = '#ea0';
+      console.log('element-01');
+      console.log(element);
+    }
+  }
+  else if(prev_star_id!=curr_span_id){
+    var element;
+    for(i=1;i<=curr_star_id;i++){
+      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
+      element.style.color = '#ea0';
+      console.log('element-02');
+      console.log(element);
+    }
+    
+  }
+  else{
+    e.target.style.color = '#ddd';
+  }
+  mX = e.pageX;
+  prevTarget_id= e.target.id;
+}
+
+function resetRatingStars(e)
+{
+  if(!prevTarget_id){
+    var all_p = prevTarget_id.split('-');
+    prev_star_id = parseInt(all_p[2]);
+    prev_span_id = parseInt(all_p[3]);
+  }
+  var all_c = e.target.id.split('-');
+  curr_star_id = parseInt(all_c[2]);
+  curr_span_id = parseInt(all_c[3]);
+  // console.log(prev_star_id,'-',prev_span_id,'-', curr_star_id,'-',curr_span_id);
+  if(prev_span_id==curr_span_id && mX >= e.pageX){
+    var element;
+    for(i=5;i>=curr_star_id;i--){
+      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
+      element.style.color = '#ddd';
+      console.log('element-03');
+      console.log(element);
+    }
+  }
+  else if(prev_span_id!=curr_span_id && mX >= e.pageX){
+    var element;
+    for(i=5;i>=curr_star_id;i--){
+      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
+      element.style.color = '#ddd';
+      console.log('element-04');
+      console.log(element);
+    }
+  }
+  else{
+    // e.target.style.color = '#ddd';
+  }
+  mX = e.pageX;
+  prevTarget_id= e.target.id;
+}
+function setRating(e){
+  if(!prevTarget_id){
+    var all_p = prevTarget_id.split('-');
+    prev_star_id = parseInt(all_p[2]);
+    prev_span_id = parseInt(all_p[3]);
+  }
+  var all_c = e.target.id.split('-');
+  curr_star_id = parseInt(all_c[2]);
+  curr_span_id = parseInt(all_c[3]);
+  var element;
+  for(i=1;i<=curr_star_id;i++){
+      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
+      element.style.color = '#ea0';
+      console.log('element-05');
+      console.log(element);
+    }
+    prevTarget_id= e.target.id;
+}
+
 </script>
 </body>
 </html>
