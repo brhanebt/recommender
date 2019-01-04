@@ -17,12 +17,10 @@ import psycopg2
 import sys
 import psycopg2.extras
 from flask import jsonify
-
+from operator import itemgetter
 
 app = Flask(__name__)
 app.debug = True
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:root@localhost/ckan_metadata'
-# db = SQLAlchemy(app)
 def connect():
 	conn_string = "host='localhost' dbname='ckan_metadata' user='postgres' password='root'"
 	conn = psycopg2.connect(conn_string)
@@ -54,19 +52,30 @@ def getGeom(location):
 	return geojsonFeature;
 def selectData(themes,location):
 	conn = connect();
-	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
-	words = formulate_keywords(themes,location);
+	cursor_IsA = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
+	cursor_Synonym = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
+	cursor_RelatedTo = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
+	cursor_MannerOf = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
+	words_IsA, words_Synonym, words_RelatedTo, words_MannerOf = formulate_keywords(themes,location);
+	# print(words);
 	if(len(location) and len(themes)):
-		# print('here');
 		geocoding_result = getGeom(location[0]);
-		# print(geocoding_result);
-		cursor.execute("SELECT mt.id,mt.id_increment,mt.title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor_IsA.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq),'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,ts_rank(mt.tokens,tsq) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+words_IsA +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		cursor_Synonym.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq),'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+words_Synonym +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		cursor_RelatedTo.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq),'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.7) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+ words_RelatedTo +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		cursor_MannerOf.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq),'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+words_MannerOf +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
 	elif(len(themes)):
-		cursor.execute("SELECT mt.id,mt.id_increment,mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor_IsA.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)),mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words_IsA +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor_Synonym.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.8),mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank FROM metadata_table mt,to_tsquery('"+words_Synonym +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor_RelatedTo.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.7),mt.description,(ts_rank(mt.tokens,tsq)*0.7) rank FROM metadata_table mt,to_tsquery('"+words_RelatedTo +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor_MannerOf.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.6),mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank FROM metadata_table mt,to_tsquery('"+words_MannerOf +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
 	elif(len(location)):
 		geocoding_result = getGeom(location[0]);
-		cursor.execute("SELECT mt.id,mt.id_increment,mt.title, mt.description FROM metadata_table mt where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");	
-	return cursor;
+		cursor_IsA.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq),'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,ts_rank(mt.tokens,tsq) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+words_IsA +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		cursor_Synonym.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.8,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+words_Synonym +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		cursor_RelatedTo.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.7,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.7) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+ words_RelatedTo +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		cursor_MannerOf.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.6,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+words_MannerOf +"') as tsq where ST_overlaps(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");	
+	return cursor_IsA,cursor_Synonym,cursor_RelatedTo,cursor_MannerOf;
 Articles = Articles()
 
 @app.route('/')
@@ -74,55 +83,103 @@ Articles = Articles()
 def index():
 	return render_template('front-base.html');
 def conceptnetExpansion(theme):
-	conceptnet_result1 = requests.get('http://api.conceptnet.io/c/en/'+theme.lower()+'');
+	conceptnet_result1 = requests.get('http://api.conceptnet.io/c/en/'+theme.lower()+'').json();
 	conceptnet_all = [];
 	conceptnet_weights = [];
 	conceptnet_all_selected = [];
+	conceptnet_RelatedTo=[];
+	conceptnet_FormOf=[];
+	conceptnet_IsA=[];
+	conceptnet_MannerOf=[];
+	conceptnet_Synonym=[];
 	offset = 0;
-	# conceptnet_words = "";
-	stop = set(stopwords.words('english'));
 	conceptnet__words = [];
-	# print('here');
 	counter = 0;
-	while len(conceptnet_result1.text)>=480:
+	while len(conceptnet_result1['edges'])>0:
 		counter += 1;
-		for edge in json.loads(conceptnet_result1.text)['edges']:
+		for edge in conceptnet_result1['edges']:
 			if 'weight' in edge and edge['weight']>=1:
 				if 'language' in edge['start'] and 'language' in edge['end']:
-					if edge['start']['language']=='en' and edge['start']['label'] not in conceptnet_all_selected:
-						conceptnet_all_selected.append(edge['start']['label']);
-						conceptnet_weights.append(edge['end']['label'] + "-" + str(edge['weight']));
-						filtered_words = [word for word in word_tokenize(conceptnet_all_selected[len(conceptnet_all_selected)-1].lower()) if word not in stop];
-					elif edge['end']['language']=='en' and edge['end']['label'] not in conceptnet_all_selected:
+					if edge['start']['language']=='en' and edge['start']['label'] not in conceptnet_all_selected:						
+						if(edge['rel']['label']=='IsA'):
+							conceptnet_IsA.append(edge['start']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='FormOf'):
+							conceptnet_FormOf.append(edge['start']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='RelatedTo'):
+							conceptnet_RelatedTo.append(edge['start']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='MannerOf'):
+							conceptnet_MannerOf.append(edge['start']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='Synonym'):
+							conceptnet_Synonym.append(edge['start']['label'].replace(" ", "_"));
+						conceptnet_all_selected.append(edge['start']['label'].replace(" ", "_"));
+						conceptnet_weights.append(edge['end']['label'] + '-' + str(edge['weight']));
+					if edge['end']['language']=='en' and edge['end']['label'] not in conceptnet_all_selected:
+						if(edge['rel']['label']=='IsA'):
+							conceptnet_IsA.append(edge['end']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='FormOf'):
+							conceptnet_FormOf.append(edge['end']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='RelatedTo'):
+							conceptnet_RelatedTo.append(edge['end']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='MannerOf'):
+							conceptnet_MannerOf.append(edge['end']['label'].replace(" ", "_"));
+						elif(edge['rel']['label']=='Synonym'):
+							conceptnet_Synonym.append(edge['end']['label'].replace(" ", "_"));
 						conceptnet_all_selected.append(edge['end']['label']);
-						conceptnet_weights.append(edge['end']['label'] + "-" + str(edge['weight']));
-						filtered_words = [word for word in word_tokenize(conceptnet_all_selected[len(conceptnet_all_selected)-1].lower()) if word not in stop];
-					for word in filtered_words:
-						if word not in conceptnet__words:
-							# conceptnet_words = conceptnet_words + "|" + word;
-							conceptnet__words.append(re.sub('[^A-Za-z0-9]+', '', word));
-		offset = offset + 20;
+						conceptnet_weights.append(edge['end']['label'] + '-' + str(edge['weight']));
 		# print(counter);
-		# print(conceptnet_weights);
-		if(counter>1):
+		offset = offset + 20;
+		if(counter>5):
 			break;
-		conceptnet_result1 = requests.get('http://api.conceptnet.io/c/en/'+theme.lower()+'?offset='+str(offset)+'&limit='+str(20));
-	# print(conceptnet__words);
-	return conceptnet__words;
+		conceptnet_result1 = requests.get('http://api.conceptnet.io/c/en/'+theme.lower()+'?offset='+str(offset)+'&limit='+str(20)).json();
+	return conceptnet_IsA, conceptnet_Synonym, conceptnet_RelatedTo, conceptnet_MannerOf;
 def formulate_keywords(themes,locations):
-	words = "";
+	words_IsA = "";words_Synonym = "";words_RelatedTo = "";words_MannerOf = "";
 	for theme in themes:
-		for word in conceptnetExpansion(theme):
-			words = words + "|"+word.lower();
+		conceptnet_IsA, conceptnet_Synonym, conceptnet_RelatedTo, conceptnet_MannerOf = conceptnetExpansion(theme);
+		for word in conceptnet_IsA:
+			words_IsA = words_IsA + "|"+word.lower();
+		for word in conceptnet_Synonym:
+			words_Synonym = words_Synonym + "|"+word.lower();
+		for word in conceptnet_RelatedTo:
+			words_RelatedTo = words_RelatedTo + "|"+word.lower();
+		for word in conceptnet_MannerOf:
+			words_MannerOf = words_MannerOf + "|"+word.lower();
+	if words_IsA:
+		if(words_IsA[0] == "|"):
+			words_IsA = words_IsA[1:];
+		if(words_IsA[len(words_IsA)-1] == "|"):
+			words_IsA = words_IsA[:-1];
 	for location in locations:
-		for word in conceptnetExpansion(location):
-			words = words + "|"+word.lower();	
-	if(words[0] == "|"):
-		words = words[1:];
-	if(words[len(words)-1] == "|"):
-		words = words[:-1];
-	print(words);
-	return words;
+		conceptnet_IsA, conceptnet_Synonym, conceptnet_RelatedTo, conceptnet_MannerOf = conceptnetExpansion(location);
+		for word in conceptnet_IsA:
+			words_IsA = words_IsA + "|"+word.lower();
+		for word in conceptnet_Synonym:
+			words_Synonym = words_Synonym + "|"+word.lower();
+		for word in conceptnet_RelatedTo:
+			words_RelatedTo = words_RelatedTo + "|"+word.lower();
+		for word in conceptnet_MannerOf:
+			words_MannerOf = words_MannerOf + "|"+word.lower();
+	if words_IsA:
+		if(words_IsA[0] == "|"):
+			words_IsA = words_IsA[1:];
+		if(words_IsA[len(words_IsA)-1] == "|"):
+			words_IsA = words_IsA[:-1];
+	if words_Synonym:
+		if(words_Synonym[0] == "|"):
+			words_Synonym = words_Synonym[1:];
+		if(words_Synonym[len(words_Synonym)-1] == "|"):
+			words_Synonym = words_Synonym[:-1];
+	if words_RelatedTo:
+		if(words_RelatedTo[0] == "|"):
+			words_RelatedTo = words_RelatedTo[1:];
+		if(words_RelatedTo[len(words_RelatedTo)-1] == "|"):
+			words_RelatedTo = words_RelatedTo[:-1];
+	if words_MannerOf:
+		if(words_MannerOf[0] == "|"):
+			words_MannerOf = words_MannerOf[1:];
+		if(words_MannerOf[len(words_MannerOf)-1] == "|"):
+			words_MannerOf = words_MannerOf[:-1];
+	return words_IsA, words_Synonym, words_RelatedTo, words_MannerOf;
 @app.route('/result_conceptnet',methods=['POST','GET'])
 
 def result_conceptnet():
@@ -132,20 +189,32 @@ def result_conceptnet():
 		themes = [];
 		location = [];
 		for key, k_type in zip(keywords, key_types):
-			print(k_type);
+			# print(k_type);
 			if(k_type=='Location'):
 				location.append(key);
 			else:
 				themes.append(key);
-		print(themes,location);
-		mymetadata = selectData(themes,location);
-		my_metadata= mymetadata.fetchall();	# print(my_metadata);
+		# print(themes,location);
+		my_metadata = [];
+		mymetadata_IsA,mymetadata_Synonym,mymetadata_RelatedTo,mymetadata_MannerOf = selectData(themes,location);
+		my_metadata = mymetadata_IsA.fetchall();
+		for metadata in mymetadata_Synonym.fetchall():
+			my_metadata.append(metadata);
+		for metadata in mymetadata_RelatedTo.fetchall():
+			my_metadata.append(metadata);
+		for metadata in mymetadata_MannerOf.fetchall():
+			my_metadata.append(metadata);
+		item = itemgetter(4);
+		if(len(my_metadata[1])>5):
+			b = [el[4] for el in my_metadata];
+			c = [el[5] for el in my_metadata];
+			for i in range(len(my_metadata)):
+				my_metadata[i].append((my_metadata[i][4]-min(b))/(max(b)-min(b)) + (my_metadata[i][5]-min(c))/(max(c)-min(c))); 
+			item = itemgetter(6);
+		my_metadata = sorted(my_metadata, key=item, reverse=True)
 		return jsonify(my_metadata);
-		 # = ['my_metadata',['hjksfh']],themes=themes,locations=location
 	return render_template('result_conceptnet.html');
 	
-
-
 @app.route('/articles')
 
 def articles():
