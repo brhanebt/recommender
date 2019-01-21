@@ -1,0 +1,406 @@
+\documentclass[12pt]{article}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{multirow}
+\usepackage{natbib}
+\usepackage{titlesec}
+\usepackage{sectsty}
+\usepackage{float}
+\usepackage{acronym}
+\usepackage{etoolbox}
+\usepackage{color,soul}
+\usepackage{rotating}
+\begin{document}
+
+\begin{titlepage}
+\begin{figure}
+\centering
+\begin{minipage}{.4\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{images/wwu.PNG}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{images/ifgi_logo.PNG}
+\end{minipage}
+\end{figure}
+\centering
+{\fontsize{16}{19}\selectfont%
+Master of Science in Geospatial Technologies \par
+}
+
+\setlength{\parindent}{0in}
+\vskip2\baselineskip
+{\fontsize{16}{19}\selectfont%
+A Systematic comparison of spatial search strategies for open government datasets\par
+}
+
+\vskip2\baselineskip
+by
+\\
+Brhane Bahrishum\par
+
+\vskip2\baselineskip
+Submitted in Partial Fulfillment of\\ the Requirements for the Erasmus Mundus Master of Science in Geospatial Technologies
+
+\vskip2\baselineskip
+INIT, Universidad Jaume I, Castellon de la plana, Spain \\
+IFGI, University of Münster, North Rhine-Westphalia, Germany \\
+NOVA IMS,University of Lisbon, Portugal \\
+
+\begin{center}
+\begin{tabular}{cc}
+\textbf{\underline{Supervisor:}} \\ \textbf{Auriol Degbelo, Ph.D.,} \\ Situated Computing and Interaction Lab, Institute for Geoinformatics, \\ 
+University of Muenster\\
+\textbf{\underline{Co-Supervisors:}}   \\\textbf{Roberto Henriques, Ph.D.} \\ NOVA IMS Information Management School\\ 
+University in Lisbon 
+\\\textbf{Sven Casteleyn, Ph.D.} \\ Institute of New Imaging Technologies, \\ Universidad Jaume I, Castellon de la plana, Spain
+\end{tabular}
+\end{center}
+
+\vfill
+{\large \today}\\[2cm]
+\pagenumbering{Roman}
+\section{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
+Acknowledgemet Goes here
+\pagebreak 
+\section{Declaration of Authorship}
+\addcontentsline{toc}{section}{Declaration of Authorship}
+I hereby declare that the thesis submitted is my own unaided work. All direct or indirect sources used are acknowledged as references.
+I am aware that the thesis in digital form can be examined for the use of unauthorized aid and in order to determine whether the thesis as a whole or parts incorporated in it may be deemed as plagiarism. For the comparison of my work with existing sources I agree that it shall be entered in a database where it shall also remain after examination, to enable comparison with future theses submitted. Further rights of reproduction and usage, however, are not granted here.
+This paper was not previously presented to another examination board and has not been published.
+\end{titlepage}
+\pagebreak 
+\section{\centering{Abstract}}
+\addcontentsline{toc}{section}{Abstract}%
+Datasets produced or collected by governments and public bodies are being made freely available for re-use. Data portals (open data portals) help realize this by providing list of datasets and links to how those datasets can be accessed. This ensures that humans can search, inspect and use the data easily.
+Those data portals consist of georeferenced data that needs to be searched properly. European data portal uses keyword search to retrieve and rank georeferenced data. 
+The goal of this work is therefore to compare different (alternative) search strategies and assess the impact of those strategies against user relevance judgment.
+
+\pagebreak 
+\section{Acronyms}
+\addcontentsline{toc}{section}{Acronyms}%
+\input{acronym_list} 
+\pagebreak 
+\listoffigures
+%\listoftables
+
+\pagestyle{empty}
+{\small\tableofcontents}
+\pagebreak 
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagebreak 
+
+
+\section{Introduction}
+\subsection{Background and Problem Statement}
+Open government datasets produced or collected by governments and public bodies are growing in size and variety at an exceptionally fast rate and being made freely available for re-use. The Data portals (open data portals) help realize this by providing list of datasets and links to how those datasets can be accessed. This ensures that humans can search, inspect and use the data easily \citep{Samimi2014}
+
+Georeferenced datasets are major components of such data portals. Those georeferenced datasets need to be searched properly.  European data portal, seems, to use keyword search to retrieve and rank georeferenced data. 
+
+The goal of this work is therefore to compare different (alternative) search strategies and assess the performance and impact of those strategies on user relevance judgment. \citep{Azad2017}
+The rest of the paper is organized as follows:
+This section outlines the background and problem statement, Aim and Objectives and Research Question
+Section 2 discusses related work
+Section 3 discusses the theoretical framework
+Section 4 discusses the methodology
+Section 5 discusses Results and discussion
+Section 6 discusses Future work and conclusion
+
+\pagebreak 
+\subsection{Aim and Objectives}
+\subsubsection{Aim}
+To compare different (alternative) search strategies and assess the performance and impact of those strategies on user relevance judgment
+\subsubsection{Objectives}
+\begin{itemize}
+\item Assess the different search mechanism in open government data
+\item Assess the performance of the different strategies
+\item Assess the impact of the different strategies on user relevance Judgement
+\end{itemize}
+
+\subsection{Research Question}
+What is the impact of the different search strategies on performance and user relevance Judgment?
+
+\pagebreak \section{Theoretical Framework and State of the Art}
+\subsection{CKAN}
+Most popular government data portals nowadays are based on CKAN, the world’s leading open
+source data portal \citep{OpenKnowledgeFoundation2009}.
+
+CKAN,as a tool for publishing open data, helps manage and publish collections of data. CKAN which is being used by almost 192 national and local governments, research institutions, and other organizations worldwide also provides RESTFULL API for data access which has been used for harvesting in this work.\citep{OpenKnowledgeFoundation2009}
+
+In open governement data portals in general, and CKAN in particular, full text Search is one integral functionality. Full text search provides the capability to query and optionally sort by relevance that satisfies a query. Even if the notion of the most common search is to find and return documents containing given query terms and return them in order of their similarity, notions of query and similarity are flexible on the specific application. The simplest of them  considers query as a set of words and similarity as the frequency of query words in the document.
+To achieve full text search functionality, CKAN uses SORL as a search platform which is a search server built on top of Apache Lucene. But despite SORL's Popularity in the information retrieval, it is not the only popular alternatives. 
+
+Elasticsearch is another Lucene based search engine which a distributed full-text search engine with an HTTP web interface and JSON. Alternatively, PostgreSQL provides full text functionality which is powerfull enough for simpler applications.
+\subsection{PostgreSQL FullText Search}
+PostgreSQL Full text search uses indexing to preprocess documents and save for later rapid searching. The preprocessing includes: parsing documents into tokens, converting tokens into lexemes, 
+storing preprocessed documents optimized for searching. 
+PostgreSQL uses a parser to identify classes of tokens, e.g., numbers, words, complex words and emails so that they are treated differently.
+It is useful to identify various classes of tokens, e.g., numbers, words, complex words, email addresses, so that they are processed differently. It also converts tokens into lexemes, normalized forms of the tokens, and also removes stop words.
+It uses tsvector datatype storing preprocessed documents, along with tsquery for making preprocessed queries \citep{PostgreSQL2018}. Both of them are used massively in this work.
+
+\citep{PostgreSQLGlobalDevelopmentGroup2016}
+\subsection{Query Expansion}
+With increasing amount of information on the web, extracting relevant information extraction on the Internet with a query of few keywords has become a challenge. Query expansion (QE) plays an important role in improving searches by reformulating the user’s initial query to a new query with similar meaningful terms. The expanded terms may come from feedback documents, target document collection, or outside knowledge resources. WordNet has been employed to many applications, where query expansion is an important one \citep{Mandala} \citep{Hsu2006}.
+
+\subsubsection{WordNet}
+WordNet is a lexical database system designed to include English nouns, verbs, and adjectives organized into synonym sets which in return each represent one underlying lexical concept. \citep{Miller1990}
+
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{Thesis/Prototype/WordNet-Structure.jpg}
+  \caption{WordNet Hierarchy}
+  \label{fig:Wordnet Hierarchy (Source \citep{Li2015})}
+\end{figure}
+
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{imgs/Structure_wordnet.jpg}
+  \caption{WordNet Structure.}
+  \label{fig:Wordnet Structure (Source \citep{Devopedia})}
+\end{figure}
+
+\subsubsection{ConceptNet}
+ConceptNet is a knowledge representation that provides a large semantic graph describing general human knowledge and how it is expressed in natural language. \citep{Speer2002}
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{Thesis/Prototype/ConceptNet_3_structure3.PNG}
+  \caption{ConceptNet Structure}
+  \label{fig:ConceptNet Structure (Source \citep{Speer2002})}
+\end{figure}
+\subsection{Relevancy Ranking}
+Relevance is one of the central concepts in information retrieval where the concern is to match information needs of the users. Despite substantial advances in search engines and information retrieval (IR) systems in the past decades, it still remains to be an illusive one to define and even more challenging to model computationally. Geographical information retrieval advances information retrieval with a spatial dimension of document representation and relevance.\citep{Cai2011}
+\subsection{Relevance Judgement}
+For effective Information Retrieval and user satisfaction, evaluation of system performance is important. Evaluation of information retrieval systems is done to assess whether the system has addressed the information needs of users. This is done either by operating user-based evaluation or system-based evaluation. Both approaches has been followed to evaluate this work.\citep{Cai2011}
+
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{imgs/relevance_judgement.jpg}
+  \caption{Relevance Judgment }
+  \label{fig:Relevance Judgement (Source \citep{Li2015})}
+\end{figure}
+
+\pagebreak \section{Related work}
+Open government data has attracted much attention in recent years, becoming part of the everyday lexicon of transparency activists, NGOs, and public officials \citep{Safarov2017}.Georeferenced Data or spatial data is an integral part of those open data portals.
+Geospatial data play an important role in enhancing the capability of humans to monitor and understand society and nature \citep{Jiang2018}.
+Most existing Open Government data portals use metadata to describe, manage, discover, and exchange data. To help users discover the relevant spatial datasets in such data infrastructures, some solutions that are based on metadata of geospatial data have been proposed, such as \citep{Jiang2018} and \citep{Chen}.
+
+Among a series of works in geographic information retrieval and ranking works, Chen et al., proposed using artificial neural networks to integrate the elementary similarities of characteristics of geospatial data to overall similarity. They stated to have achieved a higher precision interms of similarity computation of geospatial data but pointed out the availability of limited geoscience related vocabularies in wordNet and the need for continuous similarity results. Using ConceptNet and Hausdorff distance in this work is therefore related to those directions.
+
+For query expansion, wordnet and conceptnet has been used in several previous works \citep{Bouchoucha2013} \citep{Hsu2008} \citep{Hsu2008}. Therefore, the choice of wordnet and conceptnet as alternatives for query expansion is due to the fact that they have been tested in previous works very well.
+
+\pagebreak \section{Research Methodology}
+\subsection{Data Harvesting}
+To compare and evaluate the different search strategies on spatial data, particularly datasets of GeoJson, CSV and JSON formats have been harvested. The choice of datasets of GeoJSON, CSV and JSON data formats is because they statisfy the 8 Principles of Open Government Data \citep{OpenGovernmentWorkingGroup2007}. The harvesting was done by retrieving the metadata of the datasets from three data portals of English speaking countries, i.e., (data.gov.uk~959, data.gov~1003, and data.gov.ie~547 datasets) using the CKAN API.
+
+
+All CKAN based data portals have the same api URL pattern as follows
+
+\[ URL+/api/3/action/package\_search? \]
+
+    where URL stands the base data portal address.\\
+
+Therefore, the harvesting iteration over the data portals is done using the above pattern. While the metadata and dataset harvesting is done, metadata enhancement is performed. The metadata enhancement is done in two alternative operations. 
+The first is using OGR Envelope, Simple container for a bounding region, which returns a tuple (minX, maxX, minY, maxY) \citep{OGRGeometryClassReference}. This is done for GeoJSON files by iterating over each feature in the file. 
+
+The second alternative, which works for datasets that still don't have spatial extent after the first operation using OGR Envelope, is performed using a combination of DBPedia and OSM Nominatim. DBPedia, which allows users to configure the annotations to their specific needs through the DBpedia Ontology and quality measures such as promi- nence, topical pertinence, contextual ambiguity and disam- biguation confidence, is used to parse place names in title or description \citep{Mendes2011}. Using the parsed place names, OSM Nominatim is in return used to find the bounding polygon of the place. OSM Nominatim is an open street map search tool used to search by name and address and generate synthetic addresses from Open street map data  \citep{Mendes2011}. 
+Following the metadata enhancement using either of the above alternatives, the metadata is then stored in PostgreSQL followed by vectorization and indexing for full text search. 
+PostgreSQL's TS\_Vector is used for weighted  vectorization of the metadata depending whether it appeared in the title, description or tags and the results are stored locally in a database.
+\subsection{System Overview}
+\subsection{System Architecture}
+\begin{figure}[H]
+\vspace*{-0.75cm}
+  \includegraphics[angle=-90,origin=c,width=\textwidth,height=\textwidth,scale=1.5]{imgs/Structure.PNG}
+  \vspace*{-0.5cm}
+  \caption{System Architecture.}
+  \label{fig:System Architecture}
+\end{figure}
+\subsubsection{System Description}
+As it can be seen from the system architecture in the previous section, the system operates based on three different approaches. The approaches, given in the table below, are described as follows: 
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{imgs/methodology.PNG}
+  \caption{Strategies.}
+  \label{fig:Strategies}
+\end{figure}
+\subsubsection{System Description}
+
+When a user searches for a dataset, the following happens
+\begin{itemize}
+   \item Strategy 1:
+   \begin{itemize}
+     \item A PostgreSQL full text search and ranking is applied even if the user enters a keyword
+   \end{itemize}
+   \item Strategy 2:
+   \begin{itemize}
+     \item A PostgreSQL full text search and ranking is applied for the thematic user input
+     \item A spatial area of overlap or Hausdorff distance is also employed on the user input's spatial keyword, if any
+     \item A ranking function is performed based on the normalized aggregate of the thematic and spatial ranking results
+   \end{itemize}
+   \item Strategy 3:
+   \begin{itemize}
+     \item A query expansion using wordNet is applied to the thematic user input
+     \item A PostgreSQL full text search and ranking is applied for the thematic user input
+     \item A spatial area of overlap or Hausdorff distance is also employed on the user input's spatial keyword, if any
+     \item A ranking function is performed based on the normalized aggregate of the thematic and spatial ranking results
+   \end{itemize}
+   \item Strategy 4:
+   \begin{itemize}
+     \item A query expansion using ConceptNet is applied to the thematic user input
+     \item A PostgreSQL full text search and ranking is applied for the thematic user input
+     \item A spatial area of overlap or Hausdorff distance is also employed on the user input's spatial keyword, if any
+     \item A ranking function is performed based on the normalized aggregate of the thematic and spatial ranking results
+   \end{itemize}
+    
+    Moreover, the following weights has been applied in the query expansion techniques, as defined by \citep{Hsu2008}
+   \begin{figure}[H]
+  \includegraphics[width=\textwidth]{imgs/Weights.PNG}
+  \caption{Query Expansion Weights.}
+  \label{fig:Query Expansion Weights}
+\end{figure}
+   
+\end{itemize}
+\pagebreak 
+\subsection{Ranking results}
+\subsubsection{TS\_RANK}
+PostgreSQL provides the capability to rank relevant documents using TS\_RANK and TS\_RANK\_CD in relation to a given query taking into account "lexical, proximity and structural" information, that is, they consider how often the query terms appear in the document, how close together the terms are in the document, and how important is the part of the document where they occur.
+
+The ranking function TS\_RANK is given as:
+
+\[ ts\_rank([ weights float4[], ] vector tsvector, query tsquery [, normalization integer ])\]
+        
+The weights optional argument offers the ability to weigh word instances more or less heavily depending on how they are labeled. The weight arrays specify how heavily to weigh each category of word, in the order:
+
+{D-weight, C-weight, B-weight, A-weight}
+If no weights are provided, then these defaults are used:
+{0.1, 0.2, 0.4, 1.0}
+\subsubsection{PostGIS Area of Overlap}
+PostGIS's ST\_Area and ST\_Intersection to calculate the area of intersection(overlap) of the query input and the document to be queried. The ST\_Intersection which is defined as:\\
+\[ST\_Intersection(geoA , geoB );\]
+\\
+returns a geometry representing the portion that is shared between the two geometries.
+
+Moreover, area of the intersection is calculated using ST\_Area function as:
+
+\[ST\_Area(geo);\]
+
+which returns the area of the shared portion geometry if it is a Polygon or MultiPolygon. 
+
+\subsubsection{PostGIS Hausdorff Function}
+Alternatively, Hausdorff distance is also used to calculate the similarity of query location and database location. Hausdorff distance defined as the greatest of all the distances from a point in one polygon(geometry) to the closest point in the other polygon(geometry). 
+In PostGIS, the function is given by:
+\[ST\_HausdorffDistance(geo1, geo2);\]
+
+which implements algorithm for computing a distance metric which can be thought of as the "Discrete Hausdorff Distance". 
+
+\subsubsection{Aggregation}
+The Aggregation of the ranking results from both the thematic and spatial ranking is performed using the following formula: 
+
+$$Aggregate = \sum_{i=1}^{n} N(R(t))+N(R(s))$$
+
+where 
+N(R(t)) is Normalized ranking of the full text search as returned from PostgreSQL's Ts\_rank which is then normalized by dividing each rank by the range of the maximum and minimum to make the range between 0 and 1.
+N(R(s)) is Normalized ranking of the spatial query result which can either be of area of overlap or hausdorff distance. This in return is normalized by dividing by the difference between the max and min.
+
+Result is then ranked by the aggregated summation.
+\pagebreak 
+\section{Evaluation Results and Discussion}
+\subsection{Experimental Setup}
+The System is running and tested on computer with the following characteristics: \\
+\textbf{Computer Manufacturer}: HP\\
+\textbf{Operating System}: Windows 10\\
+\textbf{Processor}: AMD A6-9220 RADEON R4, 5 Compute CORES 2C+3G 2.50GHz\\
+\textbf{RAM}: 8GB\\
+\textbf{System type}: 64-bit operating system, x64-based processor\\
+\subsection{User Interface}
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{imgs/First-Page-After-Registration.PNG}
+  \caption{Prototype User Interface - Post Registration Page.}
+  \label{fig: User Interface Overview}
+\end{figure}
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{imgs/First-Page-After-Registration-drop-down.PNG}
+  \caption{Prototype User Interface.}
+  \label{fig: Navigation User Interface}
+\end{figure}
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{imgs/Base-Keyword-Transport-london.PNG}
+  \caption{Example Query and Result.}
+  \label{fig: Example Query and Result}
+\end{figure}
+\subsection{Results}
+\begin{figure}[H]%
+    \centering
+    \subfloat[Performance in Seconds]{{\includegraphics[width=5cm]{imgs/Result-Time-Transport-london-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Performance in Seconds]{{\includegraphics[width=7cm]{imgs/Result-Time-Transport-london-Graph.PNG} }}%
+    \caption{Performance in Seconds of Query Terms Transport \& london}%
+    \label{fig:Performance in Seconds of Query Terms Transport \& london}%
+\end{figure}
+\begin{figure}[H]%
+    \centering
+    \subfloat[Number of results]{{\includegraphics[width=5cm]{imgs/Result-Travel-Transport-london-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Number of results]{{\includegraphics[width=7cm]{imgs/Result-Travel-Transport-london-Graph.PNG} }}%
+    \caption{Number of results for Query Terms Transport london}%
+    \label{fig:Number of results for Query Terms Transport london}%
+\end{figure}
+\begin{figure}[H]%
+    \centering
+    \subfloat[Performance in Seconds]{{\includegraphics[width=5cm]{imgs/Result-Time-Economy-Manchester-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Performance in Seconds]{{\includegraphics[width=7cm]{imgs/Result-Time-Economy-Manchester-Graph.PNG} }}%
+    \caption{Performance in Seconds for Query Terms Economy \& Manchester}%
+    \label{fig:Performance in Seconds of Query Terms Economy \& Manchester}%
+\end{figure}
+\begin{figure}[H]%
+    \centering
+    \subfloat[Number of results]{{\includegraphics[width=5cm]{imgs/Result-Travel-Economy-Manchester-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Number of results]{{\includegraphics[width=7cm]{imgs/Result-Number_of_Results-Economy-Manchester-Graph.PNG} }}%
+    \caption{Number of results for Query Terms Economy \& Manchester}%
+    \label{fig:Number of results for Query Terms Economy \& Manchester}%
+\end{figure}
+\begin{figure}[H]%
+    \centering
+    \subfloat[Performance in Seconds]{{\includegraphics[width=5cm]{imgs/Result-Time-Energy-California-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Performance in Seconds]{{\includegraphics[width=7cm]{imgs/Result-Time-Energy-California-Graph.PNG} }}%
+    \caption{Performance in Seconds of Query Terms Energy \& California}%
+    \label{fig:Performance in Seconds of Query Terms Energy \& California}%
+\end{figure}
+\begin{figure}[H]%
+    \centering
+    \subfloat[Number of results]{{\includegraphics[width=5cm]{imgs/Result-Travel-Energy-California-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Number of results]{{\includegraphics[width=7cm]{imgs/Result-Travel-Energy-California-Graph.PNG} }}%
+    \caption{Number of resutls of Query Terms Energy \& California}%
+    \label{fig:Number of results of Query Terms Energy \& California}%
+\end{figure}
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[Performance in seconds]{{\includegraphics[width=5cm]{imgs/Result-Time-Population-Belfast-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Performance in seconds]{{\includegraphics[width=7cm]{imgs/Result-Time-Population-Belfast-Graph.PNG} }}%
+    \caption{Performance in Seconds of Query Terms Population \& Belfast}%
+    \label{fig:Performance in Seconds of Query Terms Population \& Belfast}%
+\end{figure}
+\begin{figure}[H]%
+    \centering
+    \subfloat[Number of results]{{\includegraphics[width=5cm]{imgs/Result-Travel-Population-Belfast-table.PNG} }}%
+    \qquad
+    \subfloat[Histogram for Number of results]{{\includegraphics[width=7cm]{imgs/Result-Travel-Population-Belfast-Graph.PNG} }}%
+    \caption{Number of results of Query Terms Population \& Belfast}%
+    \label{fig:Number of results of Query Terms Population \& Belfast}%
+\end{figure}
+\subsection{Result Analysis}
+\pagebreak 
+\section{Conclusion and future direction}
+Conclusion comming here
+\section{Bibliography}
+
+\bibliographystyle{abbrvnat} % or try abbrvnat or unsrtnat
+\bibliography{recommender} % refers to example.bib
+\end{document}

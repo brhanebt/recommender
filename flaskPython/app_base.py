@@ -19,19 +19,24 @@ import psycopg2.extras
 from osgeo import ogr
 import traceback
 from flask import jsonify
-
-
- 
-
+from operator import itemgetter
 
 app = Flask(__name__)
 app.debug = True
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:root@localhost/ckan_metadata'
 # db = SQLAlchemy(app)
+
 def connect():
 	conn_string = "host='localhost' dbname='ckan_metadata' user='postgres' password='root'"
 	conn = psycopg2.connect(conn_string)
 	return conn;
+
+def selectSession():
+	conn = connect();
+	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
+	cursor.execute("select id, name, username, active from users where active='t';");
+	return cursor;
+
 def selectSimilar(id_increment):
 	conn = connect();
 	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
@@ -44,10 +49,6 @@ def selectSimilar(id_increment):
 def selectDetails(id_increment):
 	conn = connect();
 	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
-	# words = formulate_keywords(themes,location);
-	# print(words);
-	# geocoding_result = requests.get('http://api.geonames.org/searchJSON?q='+location[0]+'&maxRows=10&username=brhanebt01');
-	# cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects('POINT("+geocoding_result.json()['geonames'][0]['lng']+" "+geocoding_result.json()['geonames'][0]['lat']+")'::geography::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
 	cursor.execute("SELECT id_increment,id,title,description,st_asgeojson(geom),st_asgeojson(poly_geometry) FROM metadata_table where id_increment = "+id_increment+";");
 	return cursor;	
 def getGeom(location):
@@ -79,13 +80,8 @@ def selectData(themes,location):
 	conn = connect();
 	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
 	words = formulate_keywords(themes,location);
-	print(words);
-	print(len(location));
-	print(len(themes));
 	if(len(location) and len(themes)):
-		# print('here');
 		geocoding_result = getGeom(location[0]);
-		# print(geocoding_result);
 		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
 	elif(len(themes)):
 		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
@@ -94,12 +90,12 @@ def selectData(themes,location):
 		cursor.execute("SELECT mt.id,mt.id_increment,mt.title, mt.description FROM metadata_table mt where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");	
 	return cursor;
 
-Articles = Articles()
+Articles = Articles();
 
 @app.route('/')
 
 def index():
-	return render_template('front-base.html');
+	return render_template('front.html');
 
 def formulate_keywords(themes,locations):
 	words = "";
@@ -129,11 +125,50 @@ def result_base():
 				themes.append(key);
 		mymetadata = selectData(themes,location);
 		my_metadata= mymetadata.fetchall();
-		# print(my_metadata);
+		item = itemgetter(4);
+		if(len(my_metadata)):
+			if(len(my_metadata[1])>5):
+				b = [el[4] for el in my_metadata];
+				c = [el[5] for el in my_metadata];
+				diff_b = max(b)-min(b);
+				diff_c = max(c)-min(c);
+				for i in range(len(my_metadata)):
+					if(diff_b!=0 and diff_c!=0):
+						my_metadata[i].append((my_metadata[i][4]-min(b))/(diff_b) + (my_metadata[i][5]-min(c))/(diff_c)); 
+					elif(diff_c==0):
+						diff_c = max(c)-(min(c)/2);
+						my_metadata[i].append((my_metadata[i][4]-min(b))/(diff_b) + (my_metadata[i][5]-min(c))/(diff_c)); 
+					else:
+						diff_b = max(b)-(min(b)/2);
+						my_metadata[i].append((my_metadata[i][4]-min(b))/(diff_b) + (my_metadata[i][5]-min(c))/(diff_c)); 
+				item = itemgetter(6);
+			my_metadata = sorted(my_metadata, key=item, reverse=True);
 		return jsonify(my_metadata);
-		 # = ['my_metadata',['hjksfh']],themes=themes,locations=location
-	return render_template('result_base.html');
+	return render_template('result_base.html',method='Area of Overlap');
 
+@app.route('/postmethod', methods = ['POST'])
+def postmethod():
+    jsdata = request.form;
+    # print(dict(jsdata));
+    keywords = dict(jsdata).get('javascript_data[]');
+    user_id=selectSession().fetchall()[0][0];
+    keywords_split = keywords[1].split('&');
+    id_split = keywords[0].split('-');
+    searchKeywords = [];
+    i=0;
+    while i<len(keywords_split):
+    	keyword=keywords_split[i].split('=');
+    	if(keyword[0]=='keyword'):
+    		searchKeywords.append(keyword[1]);
+    	i=i+1;
+    rating = id_split[2];
+    id_dataset = id_split[3];
+    strategy=1;
+    conn = connect();
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
+    cursor.execute("Insert into ratings values("+str(user_id)+","+str(id_dataset)+",array"+str(searchKeywords)+","+str(strategy)+","+str(rating)+") on conflict (id,id_dataset,search_keywords,strategy) do update set rating=Excluded.rating;");
+    conn.commit();
+    return 'base';
 
 @app.route('/articles')
 
@@ -146,23 +181,11 @@ def details(id, methods=['GET','POST']):
 	selectedMetadata = selectDetails(id);
 	selected_metadata= selectedMetadata.fetchall();
 	selected_similar = selectSimilar(selected_metadata[0][0]);
-	print(selected_metadata[0][5]);
-	# print(selected_similar.fetchall());
 	return render_template('details.html',selected_metadata=selected_metadata,selected_similar=selected_similar.fetchall());
-# @app.route('/harvest')
-
-# def articles():
-# 	return render_template('harvest.html',harvest = Harvest);
 
 if __name__ == '__main__':
-	app.run(debug=True,host='localhost',port=5001)
+	app.run(debug=True,host='localhost',port=50010);
 	#Define our connection string postgresql://postgres:root@localhost/ckan_metadata'
-
-# @app.route('/result', methods=['GET','POST'])
-
-# def result():
-	
-
 def details():
 	return render_template('details.html');
 

@@ -1,13 +1,13 @@
  {% extends 'index-base.html' %} 
  {% block body %}
 <div class="container">
-  <h3 align="center">Application Keywords</h3>
+  <h3 align="center">This strategy is without query expansion and {{method}} spatial search</h3>
   <h4 align="center">Enter Keywords</h4>
   {% if themes %}
   <h5 align="center">E.g: {{themes[0]}}</h5>
   <h5 align="center"><pre>Or: {{locations[0]}}</pre></h5>
   {% endif %}
-  <form method="post" action="http://localhost:5001/result_ba" id="insert_form">
+  <form method="post" action="http://localhost:50010/result_base" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
       <table class="table table-bordered" id="keyword_table">
@@ -16,14 +16,14 @@
           <th>Keyword Type</th>
           <th>
             <button type="button" name="add" class="btn btn-success btn-sm add">
-            <span class="glyphicon glyphicon-plus"></span>
+            <span class="glyphicon">&#x2b;</span>
           </button>
           </th>
         </tr>
       </table>
       </div>
       <div align="center">
-        <input type="submit" name="submit" class="btn btn-info" value="submit"/>
+        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="submit"/>
       </div>
       </form>
       <div class="container">

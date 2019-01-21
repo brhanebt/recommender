@@ -1,0 +1,17 @@
+{% extends 'index-register.html' %}
+
+{% block body %}
+  <div style="width: 50%;margin: auto;">
+    <h1>Register</h1>
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="http://localhost:5001/register">
+    <div class="form-group">
+      {{render_field(form.name, class_="form-control")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.username, class_="form-control")}}
+    </div>
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+  </form>
+  </div>
+{% endblock %}

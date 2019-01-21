@@ -1,16 +1,33 @@
  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        <ul class="nav navbar-nav-inline navbar-left list-inline">
+          <li class="nav-item list-inline-item">
+            <a class="nav-link" href="http://localhost:5001/">Home<span class="sr-only">(current)</span></a>
+            </li>
+             <li class="nav-item list-inline-item">
+            <a class="nav-link" href="http://localhost:50001/result_base_keyword">Base-Keyword<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item list-inline-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Base-Spatial</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="http://localhost:50010/result_base">Area of Overlap</a>
+              <a class="dropdown-item" href="http://localhost:50011/result_base_hausdorff">Hausdorff</a>
+            </div>
           </li>
-          <!-- <li class="nav-item">
-            <a class="nav-link" href="http://localhost:5000/articles">Articles</a>
-          </li> -->
+          <li class="nav-item list-inline-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Wordnet</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="http://localhost:50020/result_wordnet">Area of Overlap</a>
+              <a class="dropdown-item" href="http://localhost:50021/result_wordnet_hausdorff">Hausdorff</a>
+            </div>
+          </li>
+             <li class="nav-item list-inline-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Conceptnet</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="http://localhost:50030/result_conceptnet">Area of Overlap</a>
+              <a class="dropdown-item" href="http://localhost:50031/result_conceptnet_hausdorff">Hausdorff</a>
+            </div>
+          </li>
         </ul>
       </div>
     </nav>

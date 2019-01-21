@@ -1,0 +1,43 @@
+{% extends 'index.html' %}
+
+{% block body %}
+  <div class="container">
+  <div class="dropdown-menu dropdown-menu-right">
+    <button class="dropdown-item" type="button" onclick="http://localhost:5001/result_base">Baseline</button>
+    <button class="dropdown-item" type="button" onclick="http://localhost:5002/result_wordnet">WordNet</button>
+    <button class="dropdown-item" type="button" onclick="http://localhost:5003/result_conceptnet">ConceptNet</button>
+  </div>
+<div class="jumbotron text-center">
+    <h1>Welcome!!</h1>
+    <p class="lead">Please follow the links above to test each evaluation</p>
+    <p class="lead"> Notes:</p>
+        <ul class="list-group">
+             <li class="list-group-item">
+                <b>Strategy 1: Baseline keyword</b><br/> Theme and location are considered the same without spatial and non spatial consideration
+            </li>
+            <li class="list-group-item">
+            <b>Strategy 2: Baseline Spatial</b><br/>
+            Theme and location are considered different.
+            Spatial search is performed using area of overlap and hausdorff distance.
+            </li>
+            <li class="list-group-item">
+            
+          </li>
+          <li class="list-group-item">
+            <b>Strategy 3: Wordnet</b><br/>
+            In this third strategy, theme is expanded using wordnet and while location is used in spatial search using area of overlap and hausdorff distance.
+          </li>
+            <li class="list-group-item">
+              <b>Strategy 4: conceptnet</b><br/>
+            In this third strategy, theme is expanded using conceptnet and while location is used in spatial search using area of overlap and hausdorff distance.
+            </li>
+            <li class="list-group-item">
+              <b>Thank you for taking the time!</b>
+              <b>Now you can start with the baseline strategy.</b>
+            </li>
+        </ul>
+      </div>
+  </div>
+  </div>
+
+{% endblock %}
