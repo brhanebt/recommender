@@ -74,9 +74,7 @@ input.remove
 .rating {
     float:left;
 }
-#searchParameters{
-  visibility: hidden;
-}
+
 /* :not(:checked) is a filter, so that browsers that don’t support :checked don’t 
    follow these rules. Every browser that supports :checked also supports :not(), so
    it doesn’t make the test unnecessarily selective */
@@ -111,7 +109,7 @@ input.remove
 .rating:not(:checked) > label:hover,
 .rating:not(:checked) > label:hover ~ label {
     color: gold;
-    /*text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);*/
+    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
 }
 
 .rating > input:checked + label:hover,
@@ -120,7 +118,7 @@ input.remove
 .rating > input:checked ~ label:hover ~ label,
 .rating > label:hover ~ input:checked ~ label {
     color: #ea0;
-    /*text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);*/
+    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
 }
 
 .rating > label:active {
@@ -157,7 +155,7 @@ $(document).ready(function(){
   html += '<tr>';
   html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
   html += '<td><select name="keyword_type" class="form-control keyword_type"><option value="Theme">Theme</option><option value="Location">Location</option></select></td>';
-  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
+  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
   $('#keyword_table').append(html);
  });
  
@@ -177,6 +175,8 @@ $(document).ready(function(){
    }
    count = count + 1;
   });
+  
+  
   $('.keyword_type').each(function(){
    var count = 1;
    if($(this).val() == '')
@@ -189,18 +189,14 @@ $(document).ready(function(){
   var form_data = $(this).serialize();
   if(error == '')
   {
-    var endTime;
-    var startTime = new Date();
-    $("#btnSearch").prop('disabled', true);
    $.ajax({
-    url:"http://localhost:50010/result_base",
+    url:"http://localhost:5002/result_wordnet",
     method:"POST",
     data:form_data,
     success:function(data)
     {
       var y = document.getElementsByClassName('container');
       var y = y[y.length-1].getElementsByClassName('row');
-      y[0].innerHTML = '';
       // y[0].append(data);
       if(data){
         data.forEach(function(d) {
@@ -225,10 +221,6 @@ $(document).ready(function(){
           a_detailsElem.innerHTML='view details&raquo;';
            p_detailsElem.append(a_detailsElem);
            divElem.append(p_detailsElem);
-           spanSearchParameters = document.createElement('span');
-           spanSearchParameters.setAttribute('id','searchParameters');
-           spanSearchParameters.innerText=form_data;
-           divElem.append(spanSearchParameters);
            spanElem = document.createElement('span');
            spanElem.className = 'rating';
            spanElem.setAttribute('id','rating-span-'+d[1]);
@@ -251,14 +243,7 @@ $(document).ready(function(){
            // spanElem.addEventListener("click", changeRatingStars);
            divElem.append(spanElem);
            y[0].appendChild(divElem);
-           // console.log(form_data);
       })
-      endTime = new Date();
-      var timeDiff = endTime - startTime;
-      timeDiff /= 1000;
-      var seconds = Math.round(timeDiff);
-      console.log(seconds + " seconds");
-      $("#btnSearch").prop('disabled', false);
       }
       
      if(data == 'ok')
@@ -279,103 +264,35 @@ $(document).ready(function(){
 // star_elements.mouseenter(changeRatingStars);
 // star_elements.mouseleave(resetRatingStars);
 var mX = 0;
-var prevTarget_id="";
-var prev_span_id=0;
-var prev_star_id=0;
+var prevTarget;
 function changeRatingStars(e)
 {
-  if(!prevTarget_id){
-    var all_p = prevTarget_id.split('-');
-    prev_star_id = parseInt(all_p[2]);
-    prev_span_id = parseInt(all_p[3]);
-  }
-  var all_c = e.target.id.split('-');
-  curr_star_id = parseInt(all_c[2]);
-  curr_span_id = parseInt(all_c[3]);
-  prevTarget_id = e.target.id;
-  // console.log(prev_star_id,'-',prev_span_id,'-', curr_star_id,'-',curr_span_id);
-  if(prev_star_id==curr_span_id && prev_star_id<=curr_star_id){
-    var element;
-    for(i=1;i<=curr_star_id;i++){
-      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
-      element.style.color = '#ea0';
-      // console.log('element-01');
-      // console.log(element);
-    }
-  }
-  else if(prev_star_id!=curr_span_id){
-    var element;
-    for(i=1;i<=curr_star_id;i++){
-      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
-      element.style.color = '#ea0';
-      // console.log('element-02');
-      // console.log(element);
-    }
-    
+  e.target.style.color = '#ea0';
+  mX = e.pageX;
+  console.log(prevTarget,e.target);
+  prevTarget = e.target;
+}
+
+/**
+ * Resets the rating star colors when not hovered anymore.
+ */
+function resetRatingStars(e)
+{
+  if(mX<e.pageX){
+    e.target.style.color = '#ea0';
   }
   else{
     e.target.style.color = '#ddd';
   }
   mX = e.pageX;
-  prevTarget_id= e.target.id;
-}
-
-function resetRatingStars(e)
-{
-  if(!prevTarget_id){
-    var all_p = prevTarget_id.split('-');
-    prev_star_id = parseInt(all_p[2]);
-    prev_span_id = parseInt(all_p[3]);
-  }
-  var all_c = e.target.id.split('-');
-  curr_star_id = parseInt(all_c[2]);
-  curr_span_id = parseInt(all_c[3]);
-  // console.log(prev_star_id,'-',prev_span_id,'-', curr_star_id,'-',curr_span_id);
-  if(prev_span_id==curr_span_id && mX >= e.pageX){
-    var element;
-    for(i=5;i>=curr_star_id;i--){
-      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
-      element.style.color = '#ddd';
-      // console.log('element-03');
-      // console.log(element);
-    }
-  }
-  else if(prev_span_id!=curr_span_id && mX >= e.pageX){
-    var element;
-    for(i=5;i>=curr_star_id;i--){
-      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
-      element.style.color = '#ddd';
-      // console.log('element-04');
-      // console.log(element);
-    }
-  }
-  else{
-    // e.target.style.color = '#ddd';
-  }
-  mX = e.pageX;
-  prevTarget_id= e.target.id;
+  console.log(prevTarget,e.target);
+  prevTarget = e.target;
 }
 function setRating(e){
-  var form_da=document.getElementById("searchParameters").textContent;
-  if(!prevTarget_id){
-    var all_p = prevTarget_id.split('-');
-    prev_star_id = parseInt(all_p[2]);
-    prev_span_id = parseInt(all_p[3]);
-  }
-  var all_c = e.target.id.split('-');
-  curr_star_id = parseInt(all_c[2]);
-  curr_span_id = parseInt(all_c[3]);
-  var element;
-  for(i=1;i<=curr_star_id;i++){
-      element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
-      element.style.color = '#ea0';
-      // console.log('element-05');
-      // console.log(element);
-    }
-    prevTarget_id= e.target.id;
-    data = [e.target.id,form_da]
-    $.post( "/postmethod", {
-    javascript_data:  data
+  // console.log('hallo');
+  console.log(e.target);
+  $.post( "/postmethod", {
+    javascript_data: 'hello' 
 });
 }
 

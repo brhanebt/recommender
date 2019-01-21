@@ -191,9 +191,10 @@ $(document).ready(function(){
   {
     var endTime;
     var startTime = new Date();
+    // console.log(startTime);
     $("#btnSearch").prop('disabled', true);
    $.ajax({
-    url:"http://localhost:50010/result_base",
+    url:"http://localhost:50011/result_base_hausdorff",
     method:"POST",
     data:form_data,
     success:function(data)
@@ -357,6 +358,7 @@ function resetRatingStars(e)
 }
 function setRating(e){
   var form_da=document.getElementById("searchParameters").textContent;
+  console.log(form_da);
   if(!prevTarget_id){
     var all_p = prevTarget_id.split('-');
     prev_star_id = parseInt(all_p[2]);

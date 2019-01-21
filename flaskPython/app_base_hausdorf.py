@@ -21,11 +21,11 @@ import traceback
 from flask import jsonify
 from operator import itemgetter
 
+
 app = Flask(__name__)
 app.debug = True
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:root@localhost/ckan_metadata'
 # db = SQLAlchemy(app)
-
 def connect():
 	conn_string = "host='localhost' dbname='ckan_metadata' user='postgres' password='root'"
 	conn = psycopg2.connect(conn_string)
@@ -49,6 +49,10 @@ def selectSimilar(id_increment):
 def selectDetails(id_increment):
 	conn = connect();
 	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
+	# words = formulate_keywords(themes,location);
+	# print(words);
+	# geocoding_result = requests.get('http://api.geonames.org/searchJSON?q='+location[0]+'&maxRows=10&username=brhanebt01');
+	# cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects('POINT("+geocoding_result.json()['geonames'][0]['lng']+" "+geocoding_result.json()['geonames'][0]['lat']+")'::geography::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
 	cursor.execute("SELECT id_increment,id,title,description,st_asgeojson(geom),st_asgeojson(poly_geometry) FROM metadata_table where id_increment = "+id_increment+";");
 	return cursor;	
 def getGeom(location):
@@ -82,20 +86,20 @@ def selectData(themes,location):
 	words = formulate_keywords(themes,location);
 	if(len(location) and len(themes)):
 		geocoding_result = getGeom(location[0]);
-		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq),'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,ts_rank(mt.tokens,tsq) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+words +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
 	elif(len(themes)):
-		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)),mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
 	elif(len(location)):
 		geocoding_result = getGeom(location[0]);
-		cursor.execute("SELECT mt.id,mt.id_increment,mt.title, mt.description FROM metadata_table mt where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");	
+		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq),'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,ts_rank(mt.tokens,tsq) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+words +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
 	return cursor;
 
-Articles = Articles();
+Articles = Articles()
 
 @app.route('/')
 
 def index():
-	return render_template('front.html');
+	return render_template('front-base.html');
 
 def formulate_keywords(themes,locations):
 	words = "";
@@ -109,7 +113,7 @@ def formulate_keywords(themes,locations):
 		words = words[:-1];
 	# print(words);
 	return words;
-@app.route('/result_base',methods=['POST','GET'])
+@app.route('/result_base_hausdorff',methods=['POST','GET'])
 
 def result_base():
 	if request.method == 'POST':
@@ -144,7 +148,7 @@ def result_base():
 				item = itemgetter(6);
 			my_metadata = sorted(my_metadata, key=item, reverse=True);
 		return jsonify(my_metadata);
-	return render_template('result_base.html',method='Area of Overlap');
+	return render_template('result_base_hausdorff.html',method='Hausdorff Distance');
 
 @app.route('/postmethod', methods = ['POST'])
 def postmethod():
@@ -163,7 +167,7 @@ def postmethod():
     	i=i+1;
     rating = id_split[2];
     id_dataset = id_split[3];
-    strategy=1;
+    strategy=2;
     conn = connect();
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
     cursor.execute("Insert into ratings values("+str(user_id)+","+str(id_dataset)+",array"+str(searchKeywords)+","+str(strategy)+","+str(rating)+") on conflict (id,id_dataset,search_keywords,strategy) do update set rating=Excluded.rating;");
@@ -181,11 +185,23 @@ def details(id, methods=['GET','POST']):
 	selectedMetadata = selectDetails(id);
 	selected_metadata= selectedMetadata.fetchall();
 	selected_similar = selectSimilar(selected_metadata[0][0]);
+	print(selected_metadata[0][5]);
+	# print(selected_similar.fetchall());
 	return render_template('details.html',selected_metadata=selected_metadata,selected_similar=selected_similar.fetchall());
+# @app.route('/harvest')
+
+# def articles():
+# 	return render_template('harvest.html',harvest = Harvest);
 
 if __name__ == '__main__':
-	app.run(debug=True,host='localhost',port=50010);
+	app.run(debug=True,host='localhost',port=50011)
 	#Define our connection string postgresql://postgres:root@localhost/ckan_metadata'
+
+# @app.route('/result', methods=['GET','POST'])
+
+# def result():
+	
+
 def details():
 	return render_template('details.html');
 

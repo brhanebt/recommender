@@ -1,25 +1,11 @@
-{% extends 'index.html' %}
+{% extends 'index-register.html' %}
 
 {% block body %}
-  <div class="jumbotron">
-        <div class="container center_div">
-          <h3 class="display-5"> Application Keywords</h3>
-          <p class="display-6"> E.g: Population</p>
-          <p class="display-6"> &nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;London</p>
-          <form class="form-inline my-2 my-lg-0" action="http://localhost:5000/result" method="POST">
-          <!-- <input class="form-control mr-sm-2" type="text" placeholder="Go" aria-label="Search"  name='q'>
-          <button action="http://localhost:5000/result" method="get" class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
-
-          <fieldset id="buildyourform">
-    <legend>Search Keywords!</legend>
-</fieldset>
-
-  <div id="custom-border-radius">
-    <a href="#" class="ui-btn ui-icon-plus ui-btn-icon-notext ui-corner-all" id="add">No text</a>
-<input type="submit" class="btn btn-info col-xs-2 Save" value="Search" visiblity="hidden"/>
-</div>
-        </form>
-        </div>
-      </div>
-
+  <div class="jumbotron text-center">
+    <h1>Welcome!!</h1>
+    <p class="lead">Please register before you start</p>
+    {% if session.logged_in == NULL %}
+      <a href="/register" class="btn btn-primary btn-lg">Register</a>
+    {% endif %}
+  </div>
 {% endblock %}

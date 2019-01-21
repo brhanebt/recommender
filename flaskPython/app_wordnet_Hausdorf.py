@@ -18,7 +18,6 @@ import sys
 import psycopg2.extras
 from flask import jsonify
 from operator import itemgetter
-import time
 import re
 
 app = Flask(__name__)
@@ -29,6 +28,13 @@ def connect():
 	conn_string = "host='localhost' dbname='ckan_metadata' user='postgres' password='root'"
 	conn = psycopg2.connect(conn_string)
 	return conn;
+
+def selectSession():
+	conn = connect();
+	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
+	cursor.execute("select id, name, username, active from users where active='t';");
+	return cursor;
+
 def selectSimilar(id_increment):
 	conn = connect();
 	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
@@ -37,12 +43,6 @@ def selectSimilar(id_increment):
 	except Exception:
 		traceback.print_exc();
 		return;
-	return cursor;
-
-def selectSession():
-	conn = connect();
-	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
-	cursor.execute("select id, name, username, active from users where active='t';");
 	return cursor;
 
 def selectDetails(id_increment):
@@ -83,12 +83,14 @@ def selectData(themes,location):
 	wordHyper_cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
 	wordPartMero_cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
 	wordSyns,wordHypo,wordHyper,wordPartMero = formulate_keywords(themes,location);
+	# print('huh');
 	if(len(location) and len(themes)):
 		geocoding_result = getGeom(location[0]);
-		wordSyns_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.9,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.9) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordSyns +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
-		wordHypo_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.8,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordHypo +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
-		wordHyper_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.7,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.7) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordHyper +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
-		wordPartMero_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.6,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordPartMero +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		# print(geocoding_result);
+		wordSyns_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.9,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.9) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordSyns +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		wordHyper_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.7,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.7) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordHyper +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		wordPartMero_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.6,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordPartMero +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		wordHypo_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.8,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordHypo +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
 	elif(len(themes)):
 		wordSyns_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.9) title,mt.description,(ts_rank(mt.tokens,tsq)*0.9) rank FROM metadata_table mt,to_tsquery('"+wordSyns +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
 		wordHypo_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.8) title,mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank FROM metadata_table mt,to_tsquery('"+wordHypo +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
@@ -96,12 +98,11 @@ def selectData(themes,location):
 		wordPartMero_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.6) title,mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank FROM metadata_table mt,to_tsquery('"+wordPartMero +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
 	elif(len(location)):
 		geocoding_result = getGeom(location[0]);
-		wordSyns_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.9,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.9) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordSyns +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
-		wordHypo_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.8,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordHypo +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
-		wordHyper_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.7,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.7) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordHyper +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
-		wordPartMero_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.6,'-',st_area(ST_Intersection(st_makevalid(st_geomfromgeojson('"+geocoding_result+"'))::geometry, poly_geometry))), mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)) area FROM metadata_table mt,to_tsquery('"+wordPartMero +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
-	# print('hallo');
-	# print(wordSyns_cursor.fetchall());
+		wordSyns_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.9,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.9) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordSyns +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		wordHypo_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.8,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.8) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordHypo +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		wordHyper_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.7,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.7) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordHyper +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+		wordPartMero_cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title,'-',ts_rank(mt.tokens,tsq)*0.6,'-',ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry)), mt.description,(ts_rank(mt.tokens,tsq)*0.6) rank,ST_HausdorffDistance(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) area FROM metadata_table mt,to_tsquery('"+wordPartMero +"') as tsq where st_intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc,area desc;");
+	# print('hah');
 	return wordSyns_cursor,wordHypo_cursor,wordHyper_cursor,wordPartMero_cursor;
 Articles = Articles()
 
@@ -142,7 +143,7 @@ def wordnetExpansion(theme):
 					lemma = re.sub('[^_a-zA-Z0-9]', '', lemma)
 					wordnet_hypo.append(lemma);
 					wordnet_all.append(lemma);
-	print(wordnet_all);
+	print(wordnet_all)
 	return wordnet_syns,wordnet_hypo,wordnet_hyper,wordnet_part_mero;
 
 def formulate_keywords(themes,locations):
@@ -160,6 +161,16 @@ def formulate_keywords(themes,locations):
 			wordHyper = wordHyper + "|"+word.lower();
 		for word in wordnetPartMero:
 			wordPartMero = wordPartMero + "|"+word.lower();
+	# for theme in locations:
+	# 	wordnetSyns, wordnetHypo, wordnetHyper, wordnetPartMero=wordnetExpansion(theme);
+	# 	for word in wordnetSyns:
+	# 		wordSyns = wordSyns + "|"+word.lower();
+	# 	for word in wordnetHypo:
+	# 		wordHypo = wordHypo + "|"+word.lower();
+	# 	for word in wordnetHyper:
+	# 		wordHyper = wordHyper + "|"+word.lower();
+	# 	for word in wordnetPartMero:
+	# 		wordPartMero = wordPartMero + "|"+word.lower();
 	if(len(wordSyns)):
 		if(wordSyns[0] == "|"):
 			wordSyns = wordSyns[1:];
@@ -172,12 +183,15 @@ def formulate_keywords(themes,locations):
 	if(len(wordPartMero)):
 		if(wordPartMero[0] == "|"):
 			wordPartMero = wordPartMero[1:];
+	# print(wordSyns);
+	# print(wordHypo);
+	# print(wordHyper);
+	# print(wordPartMero);
 	return wordSyns, wordHypo, wordHyper, wordPartMero;
-@app.route('/result_wordnet',methods=['POST','GET'])
+@app.route('/result_wordnet_hausdorff',methods=['POST','GET'])
 
 def result_wordnet():
 	if request.method == 'POST':
-		start_time = time.time();
 		keywords = request.form.getlist('keyword');
 		key_types = request.form.getlist('keyword_type');
 		themes = [];
@@ -197,6 +211,7 @@ def result_wordnet():
 		for metadata in mymetadata_partMero.fetchall():
 			my_metadata.append(metadata);
 		item = itemgetter(4);
+		# print(len(mymetadata_syn));
 		if(len(my_metadata)):
 			if(len(my_metadata[1])>5):
 				b = [el[4] for el in my_metadata];
@@ -215,7 +230,7 @@ def result_wordnet():
 				item = itemgetter(6);
 			my_metadata = sorted(my_metadata, key=item, reverse=True);
 		return jsonify(my_metadata);
-	return render_template('result_wordnet.html',method='Area of overlap');
+	return render_template('result_wordnet_hausdorff.html',method='Hausdorff Distance');
 
 @app.route('/postmethod', methods = ['POST'])
 def postmethod():
@@ -234,7 +249,7 @@ def postmethod():
     	i=i+1;
     rating = id_split[2];
     id_dataset = id_split[3];
-    strategy=3;
+    strategy=4;
     conn = connect();
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
     cursor.execute("Insert into ratings values("+str(user_id)+","+str(id_dataset)+",array"+str(searchKeywords)+","+str(strategy)+","+str(rating)+") on conflict (id,id_dataset,search_keywords,strategy) do update set rating=Excluded.rating;");
@@ -261,7 +276,7 @@ def details(id, methods=['GET','POST']):
 # 	return render_template('harvest.html',harvest = Harvest);
 
 if __name__ == '__main__':
-	app.run(debug=True,host='localhost',port=50020)
+	app.run(debug=True,host='localhost',port=50021);
 	#Define our connection string postgresql://postgres:root@localhost/ckan_metadata'
 
 # @app.route('/result', methods=['GET','POST'])

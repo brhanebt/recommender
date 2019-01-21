@@ -1,0 +1,30 @@
+CREATE OR REPLACE FUNCTION load_csv_file(
+    target_table text,
+    csv_path text,
+    col_count integer)
+  RETURNS void AS
+$BODY$
+
+declare
+
+iter integer; -- dummy integer to iterate columns with
+col text; -- variable to keep the column name at each iteration
+col_first text; -- first column name, e.g., top left corner on a csv file or spreadsheet
+
+	begin
+    
+    create table conceptnettable ();
+
+    -- add just enough number of columns
+    for iter in 1..col_count
+    loop
+        execute format('alter table conceptnettable add column col_%s text;', iter);
+    end loop;
+
+    -- copy the data from csv file
+    execute format('copy conceptnettable from %L with delimiter '','' quote ''"'' csv ', csv_path);
+
+end;
+$BODY$ LANGUAGE plpgsql STRICT Volatile;
+
+select load_csv_file('coneceptnetTable','F:\Master Course Materials\Second Semester\Recommender-app-flask-python\flaskPython\conceptnet-assertions-5.6.0.csv',7);

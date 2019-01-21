@@ -98,33 +98,35 @@ def index():
 	return render_template('front.html');
 
 def formulate_keywords(themes,locations):
+	# print('hallo');
+	# print(themes);
 	words = "";
 	for word in themes:
 		words = words + "|"+word.lower();
-	for word in locations:
-		words = words + "|"+word.lower();
+	# for word in locations:
+	# 	words = words + "|"+word.lower();
+	print(words);
 	if(words[0] == "|"):
 		words = words[1:];
 	if(words[len(words)-1] == "|"):
 		words = words[:-1];
-	# print(words);
+	print(words);
 	return words;
-@app.route('/result_base',methods=['POST','GET'])
+@app.route('/result_base_keyword',methods=['POST','GET'])
 
-def result_base():
+def result_base_keyword():
 	if request.method == 'POST':
 		keywords = request.form.getlist('keyword');
 		key_types = request.form.getlist('keyword_type');
+		# print(keywords);
+		# print(key_types);
 		themes = [];
 		location = [];
-		for key, k_type in zip(keywords, key_types):
-			print(k_type);
-			if(k_type=='Location'):
-				location.append(key);
-			else:
+		for key in keywords:
 				themes.append(key);
 		mymetadata = selectData(themes,location);
 		my_metadata= mymetadata.fetchall();
+		# print(my_metadata);
 		item = itemgetter(4);
 		if(len(my_metadata)):
 			if(len(my_metadata[1])>5):
@@ -144,7 +146,8 @@ def result_base():
 				item = itemgetter(6);
 			my_metadata = sorted(my_metadata, key=item, reverse=True);
 		return jsonify(my_metadata);
-	return render_template('result_base.html',method='Area of Overlap');
+			 # = ['my_metadata',['hjksfh']],themes=themes,locations=location
+	return render_template('result_base_keyword.html');
 
 @app.route('/postmethod', methods = ['POST'])
 def postmethod():
@@ -163,12 +166,12 @@ def postmethod():
     	i=i+1;
     rating = id_split[2];
     id_dataset = id_split[3];
-    strategy=1;
+    strategy=0;
     conn = connect();
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
     cursor.execute("Insert into ratings values("+str(user_id)+","+str(id_dataset)+",array"+str(searchKeywords)+","+str(strategy)+","+str(rating)+") on conflict (id,id_dataset,search_keywords,strategy) do update set rating=Excluded.rating;");
     conn.commit();
-    return 'base';
+    return 'jsdata'
 
 @app.route('/articles')
 
@@ -184,7 +187,7 @@ def details(id, methods=['GET','POST']):
 	return render_template('details.html',selected_metadata=selected_metadata,selected_similar=selected_similar.fetchall());
 
 if __name__ == '__main__':
-	app.run(debug=True,host='localhost',port=50010);
+	app.run(debug=True,host='localhost',port=50001);
 	#Define our connection string postgresql://postgres:root@localhost/ckan_metadata'
 def details():
 	return render_template('details.html');

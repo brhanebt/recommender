@@ -156,7 +156,7 @@ $(document).ready(function(){
   var html = '';
   html += '<tr>';
   html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
-  html += '<td><select name="keyword_type" class="form-control keyword_type"><option value="Theme">Theme</option><option value="Location">Location</option></select></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Theme</option></select></td>';
   html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
   $('#keyword_table').append(html);
  });
@@ -189,11 +189,12 @@ $(document).ready(function(){
   var form_data = $(this).serialize();
   if(error == '')
   {
+    $("#btnSearch").prop('disabled', true);
     var endTime;
     var startTime = new Date();
-    $("#btnSearch").prop('disabled', true);
+    // console.log(startTime);
    $.ajax({
-    url:"http://localhost:50010/result_base",
+    url:"http://localhost:50001/result_base_keyword",
     method:"POST",
     data:form_data,
     success:function(data)
@@ -357,6 +358,7 @@ function resetRatingStars(e)
 }
 function setRating(e){
   var form_da=document.getElementById("searchParameters").textContent;
+  console.log(form_da);
   if(!prevTarget_id){
     var all_p = prevTarget_id.split('-');
     prev_star_id = parseInt(all_p[2]);

@@ -193,7 +193,7 @@ $(document).ready(function(){
     var startTime = new Date();
     $("#btnSearch").prop('disabled', true);
    $.ajax({
-    url:"http://localhost:50010/result_base",
+    url:"http://localhost:50021/result_wordnet_hausdorff",
     method:"POST",
     data:form_data,
     success:function(data)

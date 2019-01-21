@@ -77,9 +77,6 @@ input.remove
     float:left;
 }
 
-/* :not(:checked) is a filter, so that browsers that don’t support :checked don’t 
-   follow these rules. Every browser that supports :checked also supports :not(), so
-   it doesn’t make the test unnecessarily selective */
 .rating:not(:checked) > input {
     position:absolute;
     top:-9999px;
@@ -132,7 +129,7 @@ input.remove
 </style>
 </head>
 <body>
-	{% include 'includes/_navbar.html' %}
+	{% include 'includes/_navBar_register.html' %}
 
 	{% block body %}{% endblock %}
 </body>

@@ -1,9 +1,9 @@
- {% extends 'index-wordnet.html' %} 
+ {% extends 'index-wordnet-hausdorff.html' %} 
  {% block body %}
 <div class="container">
   <h3 align="center">This strategy uses wordnet for query expansion and {{method}} for spatial search</h3>
   <h4 align="center">Enter Keywords</h4>
-  <form method="post" action="http://localhost:50020/result_wordnet" id="insert_form">
+  <form method="post" action="http://localhost:50021/result_wordnet_hausdorff" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
       <table class="table table-bordered" id="keyword_table">
