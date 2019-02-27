@@ -54,25 +54,25 @@ def generateBounding():
                 if soup.a and soup.a['title'] and 'http://dbpedia.org/resource/' in soup.a['title']:
                     # print('here');
                     geocoding_result = requests.get('https://nominatim.openstreetmap.org/search?q='+soup.a.string+'&format=json&polygon=1&addressdetails=1');
-                    if 'polygonpoints' in geocoding_result.json()[0].keys():
-                        polygonpoints = geocoding_result.json()[0]['polygonpoints'];
-                        polyPoints[:] = [[float(e) for e in sl] for sl in polygonpoints]
-                        print(polyPoints);
-                        if(polyPoints[0]!=polyPoints[-1]):
-                            polyPoints.append(polyPoints[0]);
-                        geojsonFeature = {"type":"Polygon","coordinates":[polyPoints]};
-                        # print(geojsonFeature);
-                        geojsonFeature=json.dumps(geojsonFeature);    
-                    else:
-                        bbox = geocoding_result.json()[0]['boundingbox'];
-                        poly_wkt.append([float(bbox[2]),float(bbox[0])]);
-                        poly_wkt.append([float(bbox[3]),float(bbox[0])]);
-                        poly_wkt.append([float(bbox[3]),float(bbox[1])]);
-                        poly_wkt.append([float(bbox[2]),float(bbox[1])]);
-                        poly_wkt.append([float(bbox[2]),float(bbox[0])]);
-                        geojsonFeature = {"type":"Polygon","coordinates":[poly_wkt]};
-                        print(geojsonFeature);
-                        geojsonFeature=json.dumps(geojsonFeature);
+                    # if 'polygonpoints' in geocoding_result.json()[0].keys():
+                    #     polygonpoints = geocoding_result.json()[0]['polygonpoints'];
+                    #     polyPoints[:] = [[float(e) for e in sl] for sl in polygonpoints]
+                    #     print(polyPoints);
+                    #     if(polyPoints[0]!=polyPoints[-1]):
+                    #         polyPoints.append(polyPoints[0]);
+                    #     geojsonFeature = {"type":"Polygon","coordinates":[polyPoints]};
+                    #     # print(geojsonFeature);
+                    #     geojsonFeature=json.dumps(geojsonFeature);    
+                    # else:
+                    bbox = geocoding_result.json()[0]['boundingbox'];
+                    poly_wkt.append([float(bbox[2]),float(bbox[0])]);
+                    poly_wkt.append([float(bbox[3]),float(bbox[0])]);
+                    poly_wkt.append([float(bbox[3]),float(bbox[1])]);
+                    poly_wkt.append([float(bbox[2]),float(bbox[1])]);
+                    poly_wkt.append([float(bbox[2]),float(bbox[0])]);
+                    geojsonFeature = {"type":"Polygon","coordinates":[poly_wkt]};
+                    print(geojsonFeature);
+                    geojsonFeature=json.dumps(geojsonFeature);
                     updateDataset(row[1],"ST_GeomFromGeoJSON('" + str(geojsonFeature) + "')");
             except Exception:
                 traceback.print_exc();

@@ -1,11 +1,16 @@
 {% extends 'index-register.html' %}
 
 {% block body %}
-  <div class="jumbotron text-center">
+  <div class="jumbotron text-center" style="height: 100%">
     <h1>Welcome!!</h1>
-    <p class="lead">Please register before you start</p>
+    <p class="lead" style='font-family: "Times New Roman", Times, serif;font-size: 2.0em;'>Please keep this <a href="https://bit.ly/2UMwcaN" target="_blank">Google Form</a> open and fill it after you finish all tasks for statistical purposes.</p>
+    <p class="lead" style='font-family: "Times New Roman", Times, serif;font-size: 2.5em;'>Thank you!</p>
+    <p class="lead" style='font-family: "Times New Roman", Times, serif;font-size: 2.0em;'><strong>Start by registering here!!</strong></p>
     {% if session.logged_in == NULL %}
       <a href="/register" class="btn btn-primary btn-lg">Register</a>
+      <br/><br/><br/><br/><br/><br/><br/>
+      <br/><br/><br/><br/><br/><br/><br/>
+      <br/><br/><br/><br/><br/><br/><br/>
     {% endif %}
   </div>
 {% endblock %}

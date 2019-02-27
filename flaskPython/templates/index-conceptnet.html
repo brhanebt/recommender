@@ -8,6 +8,14 @@
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.5.0-alpha.1/jquery.mobile-1.5.0-alpha.1.min.js"></script>
+
+<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
+<!-- <script src="https://unpkg.com/@turf/turf@3.5.2/turf.min.js"></script> -->
 <style type="text/css">
 body
 {
@@ -67,7 +75,7 @@ input.remove
 .description-paragraph{
      /*white-space: nowrap;
      text-overflow: ellipsis;*/
-    height: 10em;
+    height: 15em;
     line-height: 1em;
     overflow: hidden;
 }
@@ -130,12 +138,6 @@ input.remove
 }
 
 </style>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="http://code.jquery.com/mobile/1.5.0-alpha.1/jquery.mobile-1.5.0-alpha.1.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
-<script src="https://unpkg.com/@turf/turf@3.5.2/turf.min.js"></script>
 <script type="text/javascript">
     function showDiv(){
         divELement = document.getElementsByClassName('showHide');
@@ -156,7 +158,11 @@ $(document).ready(function(){
   var html = '';
   html += '<tr>';
   html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
-  html += '<td><select name="keyword_type" class="form-control keyword_type"><option value="Theme">Theme</option><option value="Location">Location</option></select></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location">Location</option></select></td>';
+  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
+  html += '<tr>';
+  html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location" selected>Location</option></select></td>';
   html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
   $('#keyword_table').append(html);
  });
@@ -192,6 +198,11 @@ $(document).ready(function(){
     var endTime;
     var startTime = new Date();
     $("#btnSearch").prop('disabled', true);
+    nParagraph=document.getElementById("pNotification");
+    nParagraph.innerText = 'Retrieval in progress!';
+    nParagraph.style.color = "Yellow";
+    nParagraph.style.fontWeight = "900";
+    nParagraph.style.fontWeight = "bold";
    $.ajax({
     url:"http://localhost:50030/result_conceptnet",
     method:"POST",
@@ -203,8 +214,10 @@ $(document).ready(function(){
       y[0].innerHTML = '';
       // y[0].append(data);
       if(data){
+        count = 0;
         data.forEach(function(d) {
           // console.log(d);
+          count = count + 1;
           var divElem = document.createElement('div');
            divElem.className = 'col-lg-6';
            divElem.style.padding = "0";
@@ -231,7 +244,7 @@ $(document).ready(function(){
            divElem.append(spanSearchParameters);
            spanElem = document.createElement('span');
            spanElem.className = 'rating';
-           spanElem.setAttribute('id','rating-span-'+d[1]);
+           spanElem.setAttribute('id','rating-span-'+d[1]+'-'+count);
            for (index=5;index>=1;index--){
               inputElem = document.createElement('input');
               inputElem.setAttribute('type','radio');
@@ -239,7 +252,7 @@ $(document).ready(function(){
               inputElem.setAttribute('id','rating-input-1-'+index);
               inputElem.setAttribute('name','rating-input-1');
               labelElem = document.createElement('label');
-              labelElem.setAttribute('name','rating-input-1');
+              labelElem.setAttribute('name','rating-input-1'+'-'+count);
               labelElem.setAttribute('class','rating-star');
               labelElem.setAttribute('id','rating-input-'+index+'-'+d[1]);
               labelElem.addEventListener("mouseenter", changeRatingStars);
@@ -259,6 +272,11 @@ $(document).ready(function(){
       var seconds = Math.round(timeDiff);
       console.log(seconds + " seconds");
       $("#btnSearch").prop('disabled', false);
+      nParagraph=document.getElementById("pNotification");
+      nParagraph.innerText = 'Successfull retrieval!';
+      nParagraph.style.color = "Green";
+      nParagraph.style.fontWeight = "900";
+      nParagraph.style.fontWeight = "bold";
       }
       
      if(data == 'ok')
@@ -284,7 +302,7 @@ var prev_span_id=0;
 var prev_star_id=0;
 function changeRatingStars(e)
 {
-  if(!prevTarget_id){
+  if(prevTarget_id){
     var all_p = prevTarget_id.split('-');
     prev_star_id = parseInt(all_p[2]);
     prev_span_id = parseInt(all_p[3]);
@@ -293,7 +311,7 @@ function changeRatingStars(e)
   curr_star_id = parseInt(all_c[2]);
   curr_span_id = parseInt(all_c[3]);
   prevTarget_id = e.target.id;
-  // console.log(prev_star_id,'-',prev_span_id,'-', curr_star_id,'-',curr_span_id);
+  // console.log('change',prev_star_id,'prev_star-prev_span',prev_span_id,'-', curr_star_id,'cur_star-cur_span',curr_span_id);
   if(prev_star_id==curr_span_id && prev_star_id<=curr_star_id){
     var element;
     for(i=1;i<=curr_star_id;i++){
@@ -322,7 +340,7 @@ function changeRatingStars(e)
 
 function resetRatingStars(e)
 {
-  if(!prevTarget_id){
+  if(prevTarget_id){
     var all_p = prevTarget_id.split('-');
     prev_star_id = parseInt(all_p[2]);
     prev_span_id = parseInt(all_p[3]);
@@ -330,19 +348,21 @@ function resetRatingStars(e)
   var all_c = e.target.id.split('-');
   curr_star_id = parseInt(all_c[2]);
   curr_span_id = parseInt(all_c[3]);
-  // console.log(prev_star_id,'-',prev_span_id,'-', curr_star_id,'-',curr_span_id);
-  if(prev_span_id==curr_span_id && mX >= e.pageX){
+  // console.log('reset',prev_star_id,'prev_star-prev_span',prev_span_id,'-', curr_star_id,'cur_star-cur_span',curr_span_id);
+  if(prev_span_id==curr_span_id && prev_star_id > curr_star_id){
     var element;
-    for(i=5;i>=curr_star_id;i--){
+    // console.log('here');
+    for(i=prev_star_id;i>=curr_star_id;i--){
       element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
       element.style.color = '#ddd';
       // console.log('element-03');
       // console.log(element);
     }
   }
-  else if(prev_span_id!=curr_span_id && mX >= e.pageX){
+  else if(prev_span_id!=curr_span_id && prev_star_id >= curr_star_id){
     var element;
-    for(i=5;i>=curr_star_id;i--){
+    // console.log('here2');
+    for(i=10;i>=curr_star_id;i--){
       element=document.getElementById("rating-input-"+i+"-"+curr_span_id);
       element.style.color = '#ddd';
       // console.log('element-04');
@@ -350,14 +370,17 @@ function resetRatingStars(e)
     }
   }
   else{
-    // e.target.style.color = '#ddd';
+    // console.log('here3');
+    e.target.style.color = '#ddd';
   }
+  // console.log(prevTarget_id);
   mX = e.pageX;
   prevTarget_id= e.target.id;
+  // console.log(prevTarget_id);
 }
 function setRating(e){
   var form_da=document.getElementById("searchParameters").textContent;
-  if(!prevTarget_id){
+  if(prevTarget_id){
     var all_p = prevTarget_id.split('-');
     prev_star_id = parseInt(all_p[2]);
     prev_span_id = parseInt(all_p[3]);
@@ -373,11 +396,12 @@ function setRating(e){
       // console.log(element);
     }
     prevTarget_id= e.target.id;
-    data = [e.target.id,form_da]
+    data = [e.target.id,e.target.getAttribute('name'),form_da];
     $.post( "/postmethod", {
     javascript_data:  data
 });
 }
+
 
 </script>
 </body>

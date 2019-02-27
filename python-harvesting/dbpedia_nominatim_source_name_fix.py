@@ -35,15 +35,17 @@ def generateBounding():
                 country = "";
                 country_ ="";
                 # print(row[3]);
-                # print(row[4]);
+                print(row[4]);
                 # print(row[5]);
-                if(row[3]):
-                    country = row[3];
-                    country=country.split('/');
-                    country_ = country[1];
-                elif(row[4]):
+                if(row[4]):
                     country = row[4];
                     country=country.split('/');
+                    print(country);
+                    country_ = country[1];
+                elif(row[3]):
+                    country = row[3];
+                    country=country.split('/');
+                    print(country);
                     country_ = country[1];
                 else:
                     continue;
@@ -53,8 +55,8 @@ def generateBounding():
                 country_ = "united states";
             elif (country_== "united-kingdom"):
                 country_ = "united kingdom";
-            elif (country_ == "ie"):
-                country_ = "ireland";
+            elif (country_ == "ie" or country_ == "ireland"):
+                country_ = "republic+of+ireland";
             country_=country_.replace (" ", "+");
             # print(country_1);
             geocoding_result = requests.get('https://nominatim.openstreetmap.org/search?q='+country_+'&format=json&polygon=1&addressdetails=1');
@@ -85,6 +87,7 @@ def generateBounding():
                 poly_wkt.append([float(bbox[2]),float(bbox[1])]);
                 poly_wkt.append([float(bbox[2]),float(bbox[0])]);
                 # print(poly_wkt);
+                print(row[1]);
                 # ; = "[[["+str(bbox[2])+","+str(bbox[0])+"],["+str(bbox[3])+","+str(bbox[0])+"],["+str(bbox[3])+","+str(bbox[1])+"],["+str(bbox[2])+","+str(bbox[1])+"],["+str(bbox[2])+","+str(bbox[0])+"]]]";
                 geojsonFeature = {"type":"Polygon","coordinates":[poly_wkt]};
                 # print(geojsonFeature);
@@ -113,7 +116,8 @@ def selectDataset():
         cursor = conn.cursor();
         # print("Connected!\n")
         #print(json_metadataList)
-        query =  "select id,id_increment,description,local_geojson_url,local_geojson_url,geojson_url,csvurl from metadata_table where poly_geometry is null order by local_geojson_url desc;"
+        # query =  "select id,id_increment,description,local_geojson_url,local_geojson_url,geojson_url,csvurl from metadata_table where poly_geometry is null order by local_geojson_url desc;"
+        query =  "SELECT id,id_increment,description,local_geojson_url,local_csv_url,local_geojson_url,geojson_url,csvurl from metadata_table where ST_NPoints(poly_geometry)>5 or poly_geometry is null;"
         cursor.execute(query);
         # for row in cursor:
         #     print(row);

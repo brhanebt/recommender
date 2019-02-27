@@ -2,24 +2,10 @@
 
 {% block body %}
         <div class="container">
-          <h3 align="center">Application Keywords</h3>
-  <h4 align="center">Enter Keywords</h4>
-  <h5 align="center">E.g: {{Population}} Or: {{london}}</h5>
   <span id="wkt" style="visibility: hidden;" data-title="{{selected_metadata[0][2]}}"></span>
   <form method="post" action="/result_base" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
-      <table class="table table-bordered" id="keyword_table">
-        <tr>
-          <td></td>
-          <td></td>
-          <td>
-            <button type="button" name="add" class="btn btn-success btn-sm add">
-            <span class="glyphicon glyphicon-plus"></span>
-          </button>
-          </td>
-        </tr>
-      </table>
       </div>
       <div align="center">
         <input type="submit" name="submit" class="btn btn-info" value="submit" />
@@ -29,8 +15,8 @@
         <div class="row" id = "data-wkt" data-wkt="{{selected_metadata[0][4]}}">
           <!-- {{selected_metadata}} -->
           <div style="width:100%; margin:0 auto;" id="mapContainer">
-            <h4>{{selected_metadata[0][2]}}</h4>
-            <p >{{selected_metadata[0][3]}}</p>
+            <h4>{{selected_metadata[0][2]|safe}}</h4>
+            <p >{{selected_metadata[0][3]|safe}}</p>
             <!-- <p >{{selected_metadata[0][2]}}</p> -->
             <div id="map" style="height: 150px;"></div>
           </div>
@@ -40,8 +26,8 @@
         <div class="row">
         {% for metadata in selected_similar %}
           <div class="col-md-4" style="padding: 0;">
-            <h4 align="center">{{metadata.title}}</h4>
-            <p class = "description-paragraph" style="margin: auto">{{metadata.description}}</p>
+            <h4 align="center">{{metadata.title|safe}}</h4>
+            <p class = "description-paragraph" id = "description-p" style="margin: auto">{{metadata.description|safe}}</p>
           <p><a class="btn btn-secondary" href="/details/{{metadata.id_increment}}" role="button">View details &raquo;</a></p>
             <span class="rating">
     <input type="radio" class="rating-input"

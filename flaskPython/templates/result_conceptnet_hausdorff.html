@@ -1,8 +1,8 @@
  {% extends 'index-conceptnet-hausdorff.html' %} 
  {% block body %}
 <div class="container">
-  <h3 align="center">This strategy uses conceptnet for query expansion and {{method}} for spatial search</h3>
-  <h4 align="center">Enter Keywords</h4>
+  <h3 align="center">ConceptNet(Using ConceptNet query expansion and {{method}})</h3>
+  <h4 align="center">Enter Keywords(Use the green plus button)</h4>
   <form method="post" action="http://localhost:50031/result_conceptnet_hausdorff" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
@@ -15,6 +15,11 @@
       </div>
       <div align="center">
         <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="submit" onclick="showDiv();" />
+        <br/>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p id="pNotification"  style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
         
