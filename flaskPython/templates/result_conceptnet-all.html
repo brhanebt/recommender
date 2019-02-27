@@ -1,9 +1,9 @@
- {% extends 'index-conceptnet-hausdorff.html' %} 
+ {% extends 'index-conceptnet-all.html' %} 
  {% block body %}
 <div class="container">
   <h3 align="center">Using {{expansion}} query expansion and {{spatialMethod}}</h3>
   <h4 align="center">Enter Keywords(Use the green plus button)</h4>
-  <form method="post" action="http://localhost:5001/result_conceptnet_hausdorff" id="insert_form">
+  <form method="post" action="http://localhost:5001/result_conceptnet_all" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
       <table class="table table-bordered" id="keyword_table">
@@ -19,7 +19,7 @@
         <p></p>
         <p></p>
         <p></p>
-        <p id="pNotification"  style="font-size: 1.5em;color: #f49e42;"></p>
+        <p id="pNotification" style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
         

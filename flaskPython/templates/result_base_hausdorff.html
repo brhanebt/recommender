@@ -1,13 +1,9 @@
  {% extends 'index-base-hausdorff.html' %} 
  {% block body %}
 <div class="container">
-  <h3 align="center">This strategy is without query expansion and {{method}} spatial search</h3>
-  <h4 align="center">Enter Keywords</h4>
-  {% if themes %}
-  <h5 align="center">E.g: {{themes[0]}}</h5>
-  <h5 align="center"><pre>Or: {{locations[0]}}</pre></h5>
-  {% endif %}
-  <form method="post" action="http://localhost:50011/result_base_hausdorff" id="insert_form">
+  <h3 align="center">Base-Spatial(No query expansion and {{spatialMethod}})</h3>
+  <h4 align="center">Enter Keywords(Use the green plus button)</h4>
+  <form method="post" action="http://localhost:5001/result_base_hausdorff" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
       <table class="table table-bordered" id="keyword_table">
@@ -23,7 +19,12 @@
       </table>
       </div>
       <div align="center">
-        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="submit"/>
+        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="Search"/>
+        <br/>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p id="pNotification"  style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
       <div class="container">
