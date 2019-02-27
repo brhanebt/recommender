@@ -41,7 +41,7 @@ def selectSimilar(id_increment):
 	conn = connect();
 	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
 	try:
-		cursor.execute("SELECT ts_rank(i.tokens, replace(strip(original.tokens)::text, ' ', '|')::tsquery) as similarity, i.id, i.id_increment, i.title, i.description, i.geom,i.poly_geometry FROM metadata_table i, (SELECT tokens, id_increment FROM metadata_table WHERE id_increment="+ str(id_increment) +" limit 1) AS original WHERE i.id_increment != original.id_increment ORDER BY similarity desc limit 5");
+		cursor.execute("SELECT ts_rank(i.tokens, replace(strip(original.tokens)::text, ' ', '|')::tsquery) as similarity, i.id, i.id_increment, i.title, i.description, i.poly_geometry,i.poly_geometry FROM metadata_table i, (SELECT tokens, id_increment FROM metadata_table WHERE id_increment="+ str(id_increment) +" limit 1) AS original WHERE i.id_increment != original.id_increment ORDER BY similarity desc limit 5");
 	except Exception:
 		traceback.print_exc();
 		return;
@@ -74,20 +74,17 @@ def getGeom(location):
 		poly_wkt.append([float(bbox[2]),float(bbox[0])]);
 		geojsonFeature = {"type":"Polygon","coordinates":[poly_wkt]};
 		geojsonFeature=json.dumps(geojsonFeature);
-	# print(geojsonFeature);
 	return geojsonFeature;
 def selectData(themes,location):
 	conn = connect();
 	cursor = conn.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor);
 	words = formulate_keywords(themes,location);
+	# print(words);
 	if(len(location) and len(themes)):
 		geocoding_result = getGeom(location[0]);
-		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
+		cursor.execute("SELECT mt.id,mt.id_increment,mt.title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') tsq where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and tsq @@ mt.tokens order by rank desc;");
 	elif(len(themes)):
-		cursor.execute("SELECT mt.id,mt.id_increment,concat(mt.title, ts_rank(mt.tokens,tsq)) as title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') as tsq where ts_rank(mt.tokens,tsq) > 0 order by rank desc;");
-	elif(len(location)):
-		geocoding_result = getGeom(location[0]);
-		cursor.execute("SELECT mt.id,mt.id_increment,mt.title, mt.description FROM metadata_table mt where ST_Intersects(st_geomfromgeojson('"+geocoding_result+"')::geometry, poly_geometry) and ts_rank(mt.tokens,tsq) > 0 order by rank desc;");	
+		cursor.execute("SELECT mt.id,mt.id_increment,mt.title,mt.description,ts_rank(mt.tokens,tsq) rank FROM metadata_table mt,to_tsquery('"+words +"') tsq where tsq @@ mt.tokens order by rank desc;");
 	return cursor;
 
 Articles = Articles();
@@ -98,19 +95,17 @@ def index():
 	return render_template('front.html');
 
 def formulate_keywords(themes,locations):
-	# print('hallo');
-	# print(themes);
 	words = "";
 	for word in themes:
-		words = words + "|"+word.lower();
+		words = words + "&" + word.lower();
 	# for word in locations:
 	# 	words = words + "|"+word.lower();
-	print(words);
-	if(words[0] == "|"):
+	# print(words);
+	if(words[0] == "&") :
 		words = words[1:];
-	if(words[len(words)-1] == "|"):
+	if(words[len(words)-1] == "&"):
 		words = words[:-1];
-	print(words);
+	# print(words);
 	return words;
 @app.route('/result_base_keyword',methods=['POST','GET'])
 
@@ -123,13 +118,23 @@ def result_base_keyword():
 		themes = [];
 		location = [];
 		for key in keywords:
+				key = re.sub(r"\s+", '_', key);
 				themes.append(key);
+		print(themes);
 		mymetadata = selectData(themes,location);
 		my_metadata= mymetadata.fetchall();
+		indexes =[];
+		metadata_all=[];
+		for row in my_metadata:
+			if(row[0] not in indexes):
+				indexes.append(row[0]);
+				metadata_all.append(row);
+		my_metadata=metadata_all;
 		# print(my_metadata);
 		item = itemgetter(4);
 		if(len(my_metadata)):
-			if(len(my_metadata[1])>5):
+			print(len(my_metadata));
+			if(len(my_metadata[0]) and len(my_metadata[0])>5):
 				b = [el[4] for el in my_metadata];
 				c = [el[5] for el in my_metadata];
 				diff_b = max(b)-min(b);
@@ -155,7 +160,9 @@ def postmethod():
     # print(dict(jsdata));
     keywords = dict(jsdata).get('javascript_data[]');
     user_id=selectSession().fetchall()[0][0];
-    keywords_split = keywords[1].split('&');
+    keywords_split = keywords[2].split('&');
+    ranking_split = keywords[1].split('-');
+    # print(ranking_split);
     id_split = keywords[0].split('-');
     searchKeywords = [];
     i=0;
@@ -166,10 +173,10 @@ def postmethod():
     	i=i+1;
     rating = id_split[2];
     id_dataset = id_split[3];
-    strategy=0;
+    strategy=1;
     conn = connect();
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
-    cursor.execute("Insert into ratings values("+str(user_id)+","+str(id_dataset)+",array"+str(searchKeywords)+","+str(strategy)+","+str(rating)+") on conflict (id,id_dataset,search_keywords,strategy) do update set rating=Excluded.rating;");
+    cursor.execute("Insert into ratings values("+str(user_id)+","+str(id_dataset)+",array"+str(searchKeywords)+","+str(strategy)+","+str(rating)+","+str(ranking_split[3])+") on conflict (id,id_dataset,search_keywords,strategy) do update set rating=Excluded.rating;");
     conn.commit();
     return 'jsdata'
 

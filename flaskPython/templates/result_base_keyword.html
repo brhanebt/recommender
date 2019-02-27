@@ -1,12 +1,9 @@
  {% extends 'index-base-keyword.html' %} 
  {% block body %}
 <div class="container">
-  <h3 align="center">This is baseline strategy and application</h3>
-  <h4 align="center">Enter Keywords</h4>
-  {% if themes %}
-  <h5 align="center">E.g: {{themes[0]}}</h5>
-  <h5 align="center"><pre>Or: {{locations[0]}}</pre></h5>
-  {% endif %}
+  <h3 align="center"> Baseline-keyword(Simple full text search No query expansion and no spatial search)</h3>
+  <h4 align="center">Enter Keywords(Use the green plus button)</h4>
+  <h5 align="center">Theme and location are the same</h5>
   <form method="post" action="http://localhost:50001/result_base_keyword" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
@@ -20,10 +17,16 @@
           </button>
           </th>
         </tr>
+
       </table>
       </div>
       <div align="center">
-        <input type="submit" name="submit" class="btn btn-info" value="submit"/>
+        <input type="submit" name="submit" class="btn btn-info" value="Search"/>
+        <br/>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p id="pNotification" style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
       <div class="container">

@@ -67,7 +67,7 @@ input.remove
 .description-paragraph{
      /*white-space: nowrap;
      text-overflow: ellipsis;*/
-    height: 10em;
+    height: 15em;
     line-height: 1em;
     overflow: hidden;
 }
@@ -134,8 +134,9 @@ input.remove
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="http://code.jquery.com/mobile/1.5.0-alpha.1/jquery.mobile-1.5.0-alpha.1.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
-<script src="https://unpkg.com/@turf/turf@3.5.2/turf.min.js"></script>
+    
+<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
+<!-- <script src="https://unpkg.com/@turf/turf@3.5.2/turf.min.js"></script> -->
 <script type="text/javascript">
     function showDiv(){
         divELement = document.getElementsByClassName('showHide');
@@ -156,7 +157,11 @@ $(document).ready(function(){
   var html = '';
   html += '<tr>';
   html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
-  html += '<td><select name="keyword_type" class="form-control keyword_type"><option value="Theme">Theme</option><option value="Location">Location</option></select></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location">Location</option></select></td>';
+  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
+  html += '<tr>';
+  html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location" selected>Location</option></select></td>';
   html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
   $('#keyword_table').append(html);
  });
@@ -193,6 +198,12 @@ $(document).ready(function(){
     var startTime = new Date();
     // console.log(startTime);
     $("#btnSearch").prop('disabled', true);
+
+    nParagraph=document.getElementById("pNotification");
+    nParagraph.innerText = 'Retrieval in progress!';
+    nParagraph.style.color = "Yellow";
+    nParagraph.style.fontWeight = "900";
+    nParagraph.style.fontWeight = "bold";
    $.ajax({
     url:"http://localhost:50011/result_base_hausdorff",
     method:"POST",
@@ -204,8 +215,11 @@ $(document).ready(function(){
       y[0].innerHTML = '';
       // y[0].append(data);
       if(data){
+        count = 0;
         data.forEach(function(d) {
           // console.log(d);
+          count = count + 1;
+          
           var divElem = document.createElement('div');
            divElem.className = 'col-lg-6';
            divElem.style.padding = "0";
@@ -232,15 +246,15 @@ $(document).ready(function(){
            divElem.append(spanSearchParameters);
            spanElem = document.createElement('span');
            spanElem.className = 'rating';
-           spanElem.setAttribute('id','rating-span-'+d[1]);
-           for (index=5;index>=1;index--){
+          spanElem.setAttribute('id','rating-span-'+d[1]+'-'+count);
+           for (index=10;index>=1;index--){
               inputElem = document.createElement('input');
               inputElem.setAttribute('type','radio');
               inputElem.className='rating-input';
               inputElem.setAttribute('id','rating-input-1-'+index);
               inputElem.setAttribute('name','rating-input-1');
               labelElem = document.createElement('label');
-              labelElem.setAttribute('name','rating-input-1');
+              labelElem.setAttribute('name','rating-input-1'+'-'+count);
               labelElem.setAttribute('class','rating-star');
               labelElem.setAttribute('id','rating-input-'+index+'-'+d[1]);
               labelElem.addEventListener("mouseenter", changeRatingStars);
@@ -260,6 +274,11 @@ $(document).ready(function(){
       var seconds = Math.round(timeDiff);
       console.log(seconds + " seconds");
       $("#btnSearch").prop('disabled', false);
+      nParagraph=document.getElementById("pNotification");
+      nParagraph.innerText = 'Successfull retrieval!';
+      nParagraph.style.color = "Green";
+      nParagraph.style.fontWeight = "900";
+      nParagraph.style.fontWeight = "bold";
       }
       
      if(data == 'ok')
@@ -271,6 +290,12 @@ $(document).ready(function(){
    });
   }
   else{
+     $("#btnSearch").prop('disabled', false);
+    nParagraph=document.getElementById("pNotification");
+    nParagraph.innerText = 'error in retrieval!';
+    nParagraph.style.color = "Red";
+    nParagraph.style.fontWeight = "900";
+    nParagraph.style.fontWeight = "bold";
    $('#error').html('<div class="alert alert-danger">'+error+'</div>');
   }
  });
@@ -375,7 +400,7 @@ function setRating(e){
       // console.log(element);
     }
     prevTarget_id= e.target.id;
-    data = [e.target.id,form_da]
+    data = [e.target.id,e.target.getAttribute('name'),form_da];
     $.post( "/postmethod", {
     javascript_data:  data
 });

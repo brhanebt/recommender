@@ -1,25 +1,20 @@
- {% extends 'index-base.html' %} 
+ {% extends 'index-wordnet-hausdorff-all.html' %} 
  {% block body %}
 <div class="container">
-  <h3 align="center">Base-Spatial(No query expansion and {{method}})</h3>
+  <h3 align="center">Using WordNet-All(Synonyms,Hypernyms, Hyponyms) query expansion and {{method}}</h3>
   <h4 align="center">Enter Keywords(Use the green plus button)</h4>
-  <form method="post" action="http://localhost:50010/result_base" id="insert_form">
+  <form method="post" action="http://localhost:50023/result_wordnet_hausdorff_all" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
       <table class="table table-bordered" id="keyword_table">
-        <tr style="border: none;">
+        <tr>
           <th>Enter Keyword</th>
           <th>Keyword Type</th>
-          <th>
-            <button type="button" name="add" class="btn btn-success btn-sm add">
-            <span class="glyphicon">&#x2b;</span>
-          </button>
-          </th>
-        </tr>
+          <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon">&#x2b;</span></button></th>
       </table>
       </div>
       <div align="center">
-        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="Search"/>
+        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="Search" onclick="showDiv();" />
         <br/>
         <p></p>
         <p></p>
@@ -27,10 +22,11 @@
         <p id="pNotification"  style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
+        
       <div class="container">
         <div class="row">
         </div>
-      </div>
+        </div>
 </div>
 
 {% endblock %}
