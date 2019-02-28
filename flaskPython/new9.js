@@ -1,1 +1,0 @@
-least(st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, mt.poly_geometry::geometry))::decimal / st_area(st_geomfromgeojson('"+geocoding_result+"')::geometry::decimal,st_area(ST_Intersection(st_geomfromgeojson('"+geocoding_result+"')::geometry, mt.poly_geometry))::decimal / st_area(mt.poly_geometry::geometry)::decimal) area
