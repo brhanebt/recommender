@@ -1,15 +1,9 @@
- {% extends 'index-wordnet.html' %} 
+ {% extends 'index-conceptnet-all.html' %} 
  {% block body %}
 <div class="container">
-<<<<<<< HEAD
-  <h3 align="center">Using {{expansion}} query expansion & {{spatialMethod}}</h3>
+  <h3 align="center">Using {{expansion}} query expansion and {{spatialMethod}}</h3>
   <h4 align="center">Enter Keywords(Use the green plus button)</h4>
-  <form method="post" action="http://localhost:5001/result_wordnet" id="insert_form">
-=======
-  <h3 align="center">Using WordNet(Synonyms) query expansion and {{method}}</h3>
-  <h4 align="center">Enter Keywords(Use the green plus button)</h4>
-  <form method="post" action="http://localhost:50020/result_wordnet" id="insert_form">
->>>>>>> master
+  <form method="post" action="http://localhost:5001/result_conceptnet_all" id="insert_form">
     <div class="table-repsonsive">
       <span id="error"></span>
       <table class="table table-bordered" id="keyword_table">
@@ -20,12 +14,12 @@
       </table>
       </div>
       <div align="center">
-        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="Search" onclick="showDiv();" />
+        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="submit" onclick="showDiv();" />
         <br/>
         <p></p>
         <p></p>
         <p></p>
-        <p id="pNotification"  style="font-size: 1.5em;color: #f49e42;"></p>
+        <p id="pNotification" style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
         

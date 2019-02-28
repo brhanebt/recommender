@@ -204,7 +204,11 @@ $(document).ready(function(){
     nParagraph.style.fontWeight = "900";
     nParagraph.style.fontWeight = "bold";
    $.ajax({
+<<<<<<< HEAD
+    url:"http://localhost:5001/result_wordnet_hausdorff_all",
+=======
     url:"http://localhost:50023/result_wordnet_hausdorff_all",
+>>>>>>> master
     method:"POST",
     data:form_data,
     success:function(data)

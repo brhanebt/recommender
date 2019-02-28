@@ -1,1 +1,0 @@
-create table ratings(id int, id_dataset int, search_keywords text[],strategy int, rating int, primary key(id,search_keywords,strategy,id_dataset), foreign key(id) references users(id), foreign key(id_dataset) references metadata_table(id_increment));
