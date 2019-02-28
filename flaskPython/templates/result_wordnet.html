@@ -1,9 +1,15 @@
  {% extends 'index-wordnet.html' %} 
  {% block body %}
 <div class="container">
+<<<<<<< HEAD
   <h3 align="center">Using {{expansion}} query expansion & {{spatialMethod}}</h3>
   <h4 align="center">Enter Keywords(Use the green plus button)</h4>
   <form method="post" action="http://localhost:5001/result_wordnet" id="insert_form">
+=======
+  <h3 align="center">Using WordNet(Synonyms) query expansion and {{method}}</h3>
+  <h4 align="center">Enter Keywords(Use the green plus button)</h4>
+  <form method="post" action="http://localhost:50020/result_wordnet" id="insert_form">
+>>>>>>> master
     <div class="table-repsonsive">
       <span id="error"></span>
       <table class="table table-bordered" id="keyword_table">
