@@ -1,36 +1,30 @@
  {% extends 'index-wordnet-hausdorff.html' %} 
  {% block body %}
 <div class="container">
-<<<<<<< HEAD
   <h3 align="center">Using {{expansion}} query expansion & {{spatialMethod}}</h3>
   <h4 align="center">Enter Keywords(Use the green plus button)</h4>
-  <form method="post" action="http://localhost:5001/result_wordnet_hausdorff" id="insert_form">
-=======
-  <h3 align="center">Using WordNet(Synonyms) query expansion and {{method}}</h3>
-  <h4 align="center">Enter Keywords(Use the green plus button)</h4>
-  <form method="post" action="http://localhost:50021/result_wordnet_hausdorff" id="insert_form">
->>>>>>> master
+  <form method="post" action="http://localhost:5001/result_wordnet_hausdorff" id="insert_formWordNetHausdorff">
     <div class="table-repsonsive">
       <span id="error"></span>
-      <table class="table table-bordered" id="keyword_table">
+      <table class="table table-bordered" id="keyword_table_wordnet_hausdorff">
         <tr>
           <th>Enter Keyword</th>
           <th>Keyword Type</th>
-          <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon">&#x2b;</span></button></th>
+          <th><button type="button" name="add" class="btn btn-success btn-sm addWordNetHausdorff"><span class="glyphicon">&#x2b;</span></button></th>
       </table>
       </div>
       <div align="center">
-        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="Search" onclick="showDiv();" />
+        <input type="submit" id = "btnSearchWordNetHausdorff" name="submit" class="btn btn-info" value="Search"/>
         <br/>
         <p></p>
         <p></p>
         <p></p>
-        <p id="pNotification"  style="font-size: 1.5em;color: #f49e42;"></p>
+        <p id="pNotificationWordNetHausdorff"  style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
         
-      <div class="container">
-        <div class="row">
+      <div class="containerWordNetHausdorff">
+        <div class="rowWordNetHausdorff">
         </div>
         </div>
 </div>

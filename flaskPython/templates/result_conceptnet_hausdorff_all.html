@@ -3,28 +3,28 @@
 <div class="container">
   <h3 align="center">Using {{expansion}} query expansion and {{spatialMethod}}</h3>
   <h4 align="center">Enter Keywords(Use the green plus button)</h4>
-  <form method="post" action="http://localhost:5001/result_conceptnet_hausdorff_all" id="insert_form">
+  <form method="post" action="http://localhost:5001/result_conceptnet_hausdorff_all" id="insert_formConceptNetHausdorffAll">
     <div class="table-repsonsive">
       <span id="error"></span>
-      <table class="table table-bordered" id="keyword_table">
+      <table class="table table-bordered" id="keyword_table_conceptnet_hausdorff_all">
         <tr>
           <th>Enter Keyword</th>
           <th>Keyword Type</th>
-          <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon">&#x2b;</span></button></th>
+          <th><button type="button" name="add" class="btn btn-success btn-sm addConceptNetHausdorffAll"><span class="glyphicon">&#x2b;</span></button></th>
       </table>
       </div>
       <div align="center">
-        <input type="submit" id = "btnSearch" name="submit" class="btn btn-info" value="submit" onclick="showDiv();" />
+        <input type="submit" id = "btnSearchConceptNetHausdorffAll" name="submit" class="btn btn-info" value="submit"/>
         <br/>
         <p></p>
         <p></p>
         <p></p>
-        <p id="pNotification"  style="font-size: 1.5em;color: #f49e42;"></p>
+        <p id="pNotificationConceptNetHausdorffAll"  style="font-size: 1.5em;color: #f49e42;"></p>
       </div>
       </form>
         
-      <div class="container">
-        <div class="row">
+      <div class="containerConceptNetHausdorffAll">
+        <div class="rowConceptNetHausdorffAll">
         </div>
         </div>
 </div>
