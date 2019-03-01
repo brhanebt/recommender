@@ -29,7 +29,7 @@ legend
     background:black;
     color:#FFF;
 }
-input.add
+input.addWordNetHausdorffAll
 {
     float:right;
 }
@@ -46,7 +46,7 @@ select.fieldtype
     display:block;
     margin:5px;
 }
-input.remove
+input.removeWordNetHausdorffAll
 {
     float:left;
     display:block;
@@ -78,9 +78,6 @@ input.remove
 #searchParameters{
   visibility: hidden;
 }
-/* :not(:checked) is a filter, so that browsers that don’t support :checked don’t 
-   follow these rules. Every browser that supports :checked also supports :not(), so
-   it doesn’t make the test unnecessarily selective */
 .rating:not(:checked) > input {
     position:absolute;
     top:-9999px;
@@ -154,27 +151,27 @@ input.remove
 <script >
 $(document).ready(function(){
  
- $(document).on('click', '.add', function(){
+ $(document).on('click', '.addWordNetHausdorffAll', function(){
   var html = '';
   html += '<tr>';
-  html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
-  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location">Location</option></select></td>';
-  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
+  html += '<td><input type="text" name="keyword" class="form-control keywordWordNetHausdorffAll" /></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_typeWordNetHausdorffAll" disabled="disabled"><option value="Theme">Topic</option><option value="Location">Location</option></select></td>';
+  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm removeWordNetHausdorffAll"><span class="glyphicon">&#x2212;</span></button></td></tr>';
   html += '<tr>';
-  html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
-  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location" selected>Location</option></select></td>';
-  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
-  $('#keyword_table').append(html);
+  html += '<td><input type="text" name="keyword" class="form-control keywordWordNetHausdorffAll" /></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_typeWordNetHausdorffAll" disabled="disabled"><option value="Theme">Topic</option><option value="Location" selected>Location</option></select></td>';
+  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm removeWordNetHausdorffAll"><span class="glyphicon">&#x2212;</span></button></td></tr>';
+  $('#keyword_table_wordnet_hausdorff_all').append(html);
  });
  
- $(document).on('click', '.remove', function(){
+ $(document).on('click', '.removeWordNetHausdorffAll', function(){
   $(this).closest('tr').remove();
  });
  
- $('#insert_form').on('submit', function(event){
+ $('#insert_formWordNetHausdorffAll').on('submit', function(event){
   event.preventDefault();
   var error = '';
-  $('.keyword').each(function(){
+  $('.keywordWordNetHausdorffAll').each(function(){
    var count = 1;
    if($(this).val() == '')
    {
@@ -183,7 +180,7 @@ $(document).ready(function(){
    }
    count = count + 1;
   });
-  $('.keyword_type').each(function(){
+  $('.keyword_typeWordNetHausdorffAll').each(function(){
    var count = 1;
    if($(this).val() == '')
    {
@@ -197,18 +194,14 @@ $(document).ready(function(){
   {
     var endTime;
     var startTime = new Date();
-    $("#btnSearch").prop('disabled', true);    
-    nParagraph=document.getElementById("pNotification");
+    $("#btnSearchWordNetHausdorffAll").prop('disabled', true);    
+    nParagraph=document.getElementById("pNotificationWordNetHausdorffAll");
     nParagraph.innerText = 'Retrieval in progress!';
     nParagraph.style.color = "Yellow";
     nParagraph.style.fontWeight = "900";
     nParagraph.style.fontWeight = "bold";
    $.ajax({
-<<<<<<< HEAD
     url:"http://localhost:5001/result_wordnet_hausdorff_all",
-=======
-    url:"http://localhost:50023/result_wordnet_hausdorff_all",
->>>>>>> master
     method:"POST",
     data:form_data,
     success:function(data)
@@ -274,9 +267,9 @@ $(document).ready(function(){
       var timeDiff = endTime - startTime;
       timeDiff /= 1000;
       var seconds = Math.round(timeDiff);
-      console.log(seconds + " seconds");
-      $("#btnSearch").prop('disabled', false);
-      nParagraph=document.getElementById("pNotification");
+      // console.log(seconds + " seconds");
+      $("#btnSearchWordNetHausdorffAll").prop('disabled', false);
+      nParagraph=document.getElementById("pNotificationWordNetHausdorffAll");
       nParagraph.innerText = 'Successfull retrieval!';
       nParagraph.style.color = "Green";
       nParagraph.style.fontWeight = "900";
@@ -285,20 +278,20 @@ $(document).ready(function(){
       
      if(data == 'ok')
      {
-      $('#keyword_table').find("tr:gt(0)").remove();
-      $('#error').html('<div class="alert alert-success">'+data+'</div>');
+      $('#keyword_table_wordnet_hausdorff_all').find("tr:gt(0)").remove();
+      $('#errorWordNetHausdorffAll').html('<div class="alert alert-success">'+data+'</div>');
      }
     }
    });
   }
   else{
-     $("#btnSearch").prop('disabled', false);
-    nParagraph=document.getElementById("pNotification");
+     $("#btnSearchWordNetHausdorffAll").prop('disabled', false);
+    nParagraph=document.getElementById("pNotificationWordNetHausdorffAll");
     nParagraph.innerText = 'error in retrieval!';
     nParagraph.style.color = "Red";
     nParagraph.style.fontWeight = "900";
     nParagraph.style.fontWeight = "bold";
-   $('#error').html('<div class="alert alert-danger">'+error+'</div>');
+   $('#errorWordNetHausdorffAll').html('<div class="alert alert-danger">'+error+'</div>');
   }
  });
  

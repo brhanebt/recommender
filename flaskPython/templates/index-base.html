@@ -28,7 +28,7 @@ legend
     background:black;
     color:#FFF;
 }
-input.add
+input.addBase
 {
     float:right;
 }
@@ -45,7 +45,7 @@ select.fieldtype
     display:block;
     margin:5px;
 }
-input.remove
+input.removeBase
 {
     float:left;
     display:block;
@@ -152,27 +152,27 @@ input.remove
 <script >
 $(document).ready(function(){
  
- $(document).on('click', '.add', function(){
+ $(document).on('click', '.addBase', function(){
  var html = '';
   html += '<tr>';
-  html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
-  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location">Location</option></select></td>';
-  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
+  html += '<td><input type="text" name="keyword" class="form-control keywordBase" /></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_typeBase" disabled="disabled"><option value="Theme">Topic</option><option value="Location">Location</option></select></td>';
+  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm removeBase"><span class="glyphicon">&#x2212;</span></button></td></tr>';
   html += '<tr>';
-  html += '<td><input type="text" name="keyword" class="form-control keyword" /></td>';
-  html += '<td><select name="keyword_type" class="form-control keyword_type" disabled="disabled"><option value="Theme">Topic</option><option value="Location" selected>Location</option></select></td>';
-  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon">&#x2212;</span></button></td></tr>';
-  $('#keyword_table').append(html);
+  html += '<td><input type="text" name="keyword" class="form-control keywordBase" /></td>';
+  html += '<td><select name="keyword_type" class="form-control keyword_typeBase" disabled="disabled"><option value="Theme">Topic</option><option value="Location" selected>Location</option></select></td>';
+  html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm removeBase"><span class="glyphicon">&#x2212;</span></button></td></tr>';
+  $('#keyword_table_base').append(html);
  });
  
- $(document).on('click', '.remove', function(){
+ $(document).on('click', '.removeBase', function(){
   $(this).closest('tr').remove();
  });
  
- $('#insert_form').on('submit', function(event){
+ $('#insert_formBase').on('submit', function(event){
   event.preventDefault();
   var error = '';
-  $('.keyword').each(function(){
+  $('.keywordBase').each(function(){
    var count = 1;
    if($(this).val() == '')
    {
@@ -195,8 +195,8 @@ $(document).ready(function(){
   {
     var endTime;
     var startTime = new Date();
-    $("#btnSearch").prop('disabled', true);
-    nParagraph=document.getElementById("pNotification");
+    $("#btnSearchBase").prop('disabled', true);
+    nParagraph=document.getElementById("pNotificationBase");
     nParagraph.innerText = 'Retrieval in progress!';
     nParagraph.style.color = "Yellow";
     nParagraph.style.fontWeight = "900";
@@ -207,8 +207,8 @@ $(document).ready(function(){
     data:form_data,
     success:function(data)
     {
-      var y = document.getElementsByClassName('container');
-      var y = y[y.length-1].getElementsByClassName('row');
+      var y = document.getElementsByClassName('containerBase');
+      var y = y[y.length-1].getElementsByClassName('rowBase');
       y[0].innerHTML = '';
       // y[0].append(data);
       if(data){
@@ -270,8 +270,8 @@ $(document).ready(function(){
       timeDiff /= 1000;
       var seconds = Math.round(timeDiff);
       console.log(seconds + " seconds");
-      $("#btnSearch").prop('disabled', false);
-      nParagraph=document.getElementById("pNotification");
+      $("#btnSearchBase").prop('disabled', false);
+      nParagraph=document.getElementById("pNotificationBase");
       nParagraph.innerText = 'Successfull retrieval!';
       nParagraph.style.color = "Green";
       nParagraph.style.fontWeight = "900";
@@ -280,20 +280,20 @@ $(document).ready(function(){
       
      if(data == 'ok')
      {
-      $('#keyword_table').find("tr:gt(0)").remove();
-      $('#error').html('<div class="alert alert-success">'+data+'</div>');
+      $('#keyword_table_base').find("tr:gt(0)").remove();
+      $('#errorBase').html('<div class="alert alert-success">'+data+'</div>');
      }
     }
    });
   }
   else{
-    $("#btnSearch").prop('disabled', false);
-    nParagraph=document.getElementById("pNotification");
+    $("#btnSearchBase").prop('disabled', false);
+    nParagraph=document.getElementById("pNotificationBase");
     nParagraph.innerText = 'Error in retrieval!';
     nParagraph.style.color = "Red";
     nParagraph.style.fontWeight = "900";
     nParagraph.style.fontWeight = "bold";
-   $('#error').html('<div class="alert alert-danger">'+error+'</div>');
+   $('#errorBase').html('<div class="alert alert-danger">'+error+'</div>');
   }
  });
  
