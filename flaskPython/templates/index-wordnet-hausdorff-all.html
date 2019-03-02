@@ -399,7 +399,7 @@ function setRating(e){
       // console.log(element);
     }
     prevTarget_id= e.target.id;
-    data = [e.target.id,e.target.getAttribute('name'),form_da];
+    data = [e.target.id,e.target.getAttribute('name'),form_da,7];
     $.post( "/postmethod", {
     javascript_data:  data
 });
