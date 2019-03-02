@@ -1234,6 +1234,7 @@ def postmethod():
     ranking_split = keywords[1].split('-');
     # print(ranking_split);
     id_split = keywords[0].split('-');
+    # print()
     searchKeywords = [];
     i=0;
     while i<len(keywords_split):
@@ -1243,7 +1244,7 @@ def postmethod():
     	i=i+1;
     rating = id_split[2];
     id_dataset = id_split[3];
-    strategy=2;
+    strategy=keywords[3];
     conn = connect();
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor);
     cursor.execute("Insert into ratings values("+str(user_id)+","+str(id_dataset)+",array"+str(searchKeywords)+","+str(strategy)+","+str(rating)+","+str(ranking_split[3])+") on conflict (id,id_dataset,search_keywords,strategy) do update set rating=Excluded.rating;");
