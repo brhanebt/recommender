@@ -1,4 +1,4 @@
-# A Systematic Comparison of Spatial Search Strategies in Open Government Datasets
+# Spatial search strategies for open government data: A systematic comparison
 Scripts for datasets and metadata harvesting, preprocessing, and prototype application to systematically compare spatial search strategies in open government data portals.
 
 11 search strategies were chosen to examine four aspects of OGD retrieval more closely:
