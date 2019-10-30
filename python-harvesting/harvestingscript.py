@@ -233,8 +233,8 @@ def apiCall(dataportal, category, belongsto, datatype, exceptionCount):
         # print(_resultLength)
 
 
-dataportals=[{'country': 'united-kingdom', 'dataportal': "https://data.gov.uk"}]
-#dataportals=[{'country': 'ireland','dataportal': "https://data.gov.ie"}, {'country': 'us', 'dataportal': 'https://catalog.data.gov'},{'country': 'united-kingdom', 'dataportal': "https://data.gov.uk"}]
+#dataportals=[{'country': 'united-kingdom', 'dataportal': "https://data.gov.uk"}]
+dataportals=[{'country': 'ireland','dataportal': "https://data.gov.ie"}, {'country': 'us', 'dataportal': 'https://catalog.data.gov'},{'country': 'united-kingdom', 'dataportal': "https://data.gov.uk"}]
 category=""
 datatype="geojson"
 exceptionCount=0
